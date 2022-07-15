@@ -1,1 +1,4 @@
 .DS_Store
+.DEV.md
+tests/testdata/store
+tests/testdata/uploadspec

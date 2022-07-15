@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"github.com/wwqdrh/logger"
 )
 
-func Start() error {
+func Start(ctx context.Context) error {
 	if err := os.MkdirAll(ServerFlag.Store, 0o777); err != nil {
 		return fmt.Errorf("创建保存路径失败: %w", err)
 	}
@@ -33,16 +34,26 @@ func Start() error {
 
 	go func() {
 		for {
-			event := <-handler.CompleteUploads
-			logger.DefaultLogger.Info(fmt.Sprintf("Upload %s finished\n", event.Upload.ID))
+			select {
+			case event := <-handler.CompleteUploads:
+				logger.DefaultLogger.Info(fmt.Sprintf("Upload %s finished\n", event.Upload.ID))
+			case <-ctx.Done():
+				return
+			}
 		}
 	}()
 
 	http.Handle(ServerFlag.Urlpath, http.StripPrefix(ServerFlag.Urlpath, handler))
-	logger.DefaultLogger.Info(ServerFlag.Port)
-	err = http.ListenAndServe(ServerFlag.Port, nil)
-	if err != nil {
-		return fmt.Errorf("服务退出出错: %w", err)
-	}
+
+	go func() {
+		logger.DefaultLogger.Info(ServerFlag.Port)
+		err = http.ListenAndServe(ServerFlag.Port, nil)
+		if err != nil {
+			logger.DefaultLogger.Error(fmt.Sprintf("服务退出出错: %s", err.Error()))
+		}
+	}()
+
+	<-ctx.Done()
+
 	return nil
 }

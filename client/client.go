@@ -16,15 +16,15 @@ func Start() error {
 	}
 	defer f.Close()
 
-	s, err := store.NewLeveldbStore(ClientFlag.Uploadfile)
+	s, err := store.NewLeveldbStore(ClientFlag.SpecPath)
 	if err != nil {
 		return fmt.Errorf("持久化组件初始化失败: %w", err)
 	}
 
 	client, err := internal.NewClient(ClientFlag.Host, &internal.Config{
 		ChunkSize:           2 * 1024 * 1024,
-		Resume:              false,
-		OverridePatchMethod: false,
+		Resume:              true,
+		OverridePatchMethod: true,
 		Store:               s,
 		Header:              make(http.Header),
 		HttpClient:          nil,

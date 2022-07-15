@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	ClientCmd.Flags().StringVar(&client.ClientFlag.Host, "host", "", "目标ip")
+	ClientCmd.Flags().StringVar(&client.ClientFlag.Host, "host", "", "目标地址 http://127.0.0.1:1080/files/")
 	ClientCmd.Flags().StringVar(&client.ClientFlag.Uploadfile, "upload", "", "上传文件")
 	ClientCmd.Flags().StringVar(&client.ClientFlag.SpecPath, "spec", "", "文件的分片信息")
 

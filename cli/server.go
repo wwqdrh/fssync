@@ -4,6 +4,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/wwqdrh/fssync/server"
 	"github.com/wwqdrh/logger"
@@ -17,7 +19,9 @@ var (
 		Example:      "...",
 		SilenceUsage: false,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := server.Start()
+			ctx, cancel := context.WithCancel(context.TODO())
+			defer cancel()
+			err := server.Start(ctx)
 			if err != nil {
 				logger.DefaultLogger.Error(err.Error())
 			}
@@ -29,5 +33,5 @@ var (
 func init() {
 	ServerCmd.Flags().StringVar(&server.ServerFlag.Port, "port", ":1080", "目标端口")
 	ServerCmd.Flags().StringVar(&server.ServerFlag.Store, "store", "./stores", "保存路径")
-	ServerCmd.Flags().StringVar(&server.ServerFlag.Urlpath, "baseurl", "/files", "url基础路径")
+	ServerCmd.Flags().StringVar(&server.ServerFlag.Urlpath, "baseurl", "/files/", "url基础路径")
 }
