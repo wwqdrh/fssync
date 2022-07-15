@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/wwqdrh/logger"
 )
 
 var rootCmd = &cobra.Command{
@@ -11,7 +12,9 @@ var rootCmd = &cobra.Command{
 	Long:              `文件同步工具, 提供客户端与服务端`,
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		if err := cmd.Help(); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	},
 }
 
@@ -22,6 +25,8 @@ func init() {
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		rootCmd.Help()
+		if err := rootCmd.Help(); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	}
 }

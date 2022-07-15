@@ -37,8 +37,12 @@ func init() {
 	ClientCmd.Flags().StringVar(&clientFlag.host, "host", "", "目标ip")
 	ClientCmd.Flags().StringVar(&clientFlag.uploadfile, "upload", "", "上传文件")
 
-	ClientCmd.MarkFlagRequired("host")
-	ClientCmd.MarkFlagRequired("upload")
+	if err := ClientCmd.MarkFlagRequired("host"); err != nil {
+		logger.DefaultLogger.Error(err.Error())
+	}
+	if err := ClientCmd.MarkFlagRequired("upload"); err != nil {
+		logger.DefaultLogger.Error(err.Error())
+	}
 }
 
 func ClientStart() error {
