@@ -13,11 +13,13 @@ require (
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fluent/fluent-logger-golang v1.9.0 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect

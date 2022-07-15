@@ -1,4 +1,4 @@
-package client
+package store
 
 type Store interface {
 	Get(fingerprint string) (string, bool)
