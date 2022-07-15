@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -20,12 +21,17 @@ func Start() error {
 	if err != nil {
 		return fmt.Errorf("持久化组件初始化失败: %w", err)
 	}
+	v, ok := s.(store.UploadStore)
+	if !ok {
+		return fmt.Errorf("持久化组件初始化失败: %w", errors.New("leveldb store未实现uploadStore接口"))
+	}
+	defer v.Close()
 
-	client, err := internal.NewClient(ClientFlag.Host, &internal.Config{
+	client, err := internal.NewUploadClient(ClientFlag.Host, &internal.UploadConfig{
 		ChunkSize:           2 * 1024 * 1024,
 		Resume:              true,
 		OverridePatchMethod: true,
-		Store:               s,
+		Store:               v,
 		Header:              make(http.Header),
 		HttpClient:          nil,
 	})

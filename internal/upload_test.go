@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEncodedMetadata(t *testing.T) {
-	u := NewUploadFromBytes([]byte(""))
+	u, err := NewUploadFromBytes([]byte(""))
+	require.Nil(t, err)
 	u.Metadata["filename"] = "foobar.txt"
 	enc := u.EncodedMetadata()
 	assert.Equal(t, "filename Zm9vYmFyLnR4dA==", enc)

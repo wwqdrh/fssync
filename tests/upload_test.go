@@ -19,10 +19,11 @@ type UploadSuite struct {
 }
 
 func TestUploadSuite(t *testing.T) {
+
 	suite.Run(t, &UploadSuite{})
 }
 
-func (s *UploadSuite) SetupTest() {
+func (s *UploadSuite) SetupSuite() {
 	server.ServerFlag.Port = ":1080"
 	server.ServerFlag.Store = "./testdata/store"
 	server.ServerFlag.Urlpath = "/files/"
@@ -39,7 +40,7 @@ func (s *UploadSuite) SetupTest() {
 	}()
 }
 
-func (s *UploadSuite) TearDownTest() {
+func (s *UploadSuite) TearDownSuite() {
 	s.cancel()
 	time.Sleep(3 * time.Second) // wait quit
 }

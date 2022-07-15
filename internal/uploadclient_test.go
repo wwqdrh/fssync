@@ -7,7 +7,7 @@ import (
 )
 
 func TestConfingMissingStore(t *testing.T) {
-	c := Config{
+	c := UploadConfig{
 		ChunkSize:           1048576 * 15, // 15 MB
 		Resume:              true,
 		OverridePatchMethod: false,
@@ -19,7 +19,7 @@ func TestConfingMissingStore(t *testing.T) {
 }
 
 func TestConfingChunkSizeZero(t *testing.T) {
-	c := Config{
+	c := UploadConfig{
 		ChunkSize:           0,
 		Resume:              false,
 		OverridePatchMethod: false,
@@ -31,6 +31,6 @@ func TestConfingChunkSizeZero(t *testing.T) {
 }
 
 func TestConfingValid(t *testing.T) {
-	c := DefaultConfig()
+	c := DefaultUploadConfig()
 	assert.Nil(t, c.Validate())
 }

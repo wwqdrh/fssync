@@ -70,22 +70,25 @@ func NewUploadFromFile(f *os.File) (*Upload, error) {
 
 	fingerprint := fmt.Sprintf("%s-%d-%s", fi.Name(), fi.Size(), fi.ModTime())
 
-	return NewUpload(f, fi.Size(), metadata, fingerprint), nil
+	return NewUpload(f, fi.Size(), metadata, fingerprint)
 }
 
 // NewUploadFromBytes creates a new upload from a byte array.
-func NewUploadFromBytes(b []byte) *Upload {
+func NewUploadFromBytes(b []byte) (*Upload, error) {
 	buffer := bytes.NewReader(b)
 	return NewUpload(buffer, buffer.Size(), nil, "")
 }
 
 // NewUpload creates a new upload from an io.Reader.
-func NewUpload(reader io.Reader, size int64, metadata Metadata, fingerprint string) *Upload {
+func NewUpload(reader io.Reader, size int64, metadata Metadata, fingerprint string) (*Upload, error) {
 	stream, ok := reader.(io.ReadSeeker)
 
 	if !ok {
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(reader)
+		_, err := buf.ReadFrom(reader)
+		if err != nil {
+			return nil, err
+		}
 		stream = bytes.NewReader(buf.Bytes())
 	}
 
@@ -99,7 +102,7 @@ func NewUpload(reader io.Reader, size int64, metadata Metadata, fingerprint stri
 
 		Fingerprint: fingerprint,
 		Metadata:    metadata,
-	}
+	}, nil
 }
 
 func b64encode(s string) string {

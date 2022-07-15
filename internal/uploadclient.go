@@ -1,24 +1,67 @@
 package internal
 
 import (
-	"os"
-
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	netUrl "net/url"
 	"strconv"
+
+	"net/http"
+
+	"github.com/wwqdrh/fssync/internal/store"
 )
 
 const (
 	ProtocolVersion = "1.0.0"
 )
 
+// Config provides a way to configure the Client depending on your needs.
+type UploadConfig struct {
+	// ChunkSize divide the file into chunks.
+	ChunkSize int64
+	// Resume enables resumable upload.
+	Resume bool
+	// OverridePatchMethod allow to by pass proxies sendind a POST request instead of PATCH.
+	OverridePatchMethod bool
+	// Store map an upload's fingerprint with the corresponding upload URL.
+	// If Resume is true the Store is required.
+	Store store.UploadStore
+	// Set custom header values used in all requests.
+	Header http.Header
+	// HTTP Client
+	HttpClient *http.Client
+}
+
+// DefaultConfig return the default Client configuration.
+func DefaultUploadConfig() *UploadConfig {
+	return &UploadConfig{
+		ChunkSize:           2 * 1024 * 1024,
+		Resume:              false,
+		OverridePatchMethod: false,
+		Store:               nil,
+		Header:              make(http.Header),
+		HttpClient:          nil,
+	}
+}
+
+// Validate validates the custom configuration.
+func (c *UploadConfig) Validate() error {
+	if c.ChunkSize < 1 {
+		return ErrChuckSize
+	}
+
+	if c.Resume && c.Store == nil {
+		return ErrNilStore
+	}
+
+	return nil
+}
+
 // Client represents the tus client.
 // You can use it in goroutines to create parallels uploads.
-type Client struct {
-	Config  *Config
+type UploadClient struct {
+	Config  *UploadConfig
 	Url     string
 	Version string
 	Header  http.Header
@@ -27,9 +70,9 @@ type Client struct {
 }
 
 // NewClient creates a new tus client.
-func NewClient(url string, config *Config) (*Client, error) {
+func NewUploadClient(url string, config *UploadConfig) (*UploadClient, error) {
 	if config == nil {
-		config = DefaultConfig()
+		config = DefaultUploadConfig()
 	} else {
 		if err := config.Validate(); err != nil {
 			return nil, err
@@ -44,7 +87,7 @@ func NewClient(url string, config *Config) (*Client, error) {
 		config.HttpClient = &http.Client{}
 	}
 
-	return &Client{
+	return &UploadClient{
 		Config:  config,
 		Url:     url,
 		Version: ProtocolVersion,
@@ -54,7 +97,7 @@ func NewClient(url string, config *Config) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Do(req *http.Request) (*http.Response, error) {
+func (c *UploadClient) Do(req *http.Request) (*http.Response, error) {
 	for k, v := range c.Header {
 		req.Header[k] = v
 	}
@@ -65,7 +108,7 @@ func (c *Client) Do(req *http.Request) (*http.Response, error) {
 }
 
 // CreateUpload creates a new upload in the server.
-func (c *Client) CreateUpload(u *Upload) (*Uploader, error) {
+func (c *UploadClient) CreateUpload(u *Upload) (*Uploader, error) {
 	if u == nil {
 		return nil, ErrNilUpload
 	}
@@ -101,7 +144,9 @@ func (c *Client) CreateUpload(u *Upload) (*Uploader, error) {
 		}
 
 		if c.Config.Resume {
-			c.Config.Store.Set(u.Fingerprint, newURL.String())
+			if err := c.Config.Store.Set(u.Fingerprint, newURL.String()); err != nil {
+				return nil, err
+			}
 		}
 
 		return NewUploader(c, newURL.String(), u, 0), nil
@@ -114,7 +159,7 @@ func (c *Client) CreateUpload(u *Upload) (*Uploader, error) {
 	}
 }
 
-func (c *Client) resolveLocationURL(location string) (*netUrl.URL, error) {
+func (c *UploadClient) resolveLocationURL(location string) (*netUrl.URL, error) {
 	baseURL, err := netUrl.Parse(c.Url)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL '%s'", c.Url)
@@ -129,7 +174,7 @@ func (c *Client) resolveLocationURL(location string) (*netUrl.URL, error) {
 }
 
 // ResumeUpload resumes the upload if already created, otherwise it will return an error.
-func (c *Client) ResumeUpload(u *Upload) (*Uploader, error) {
+func (c *UploadClient) ResumeUpload(u *Upload) (*Uploader, error) {
 	if u == nil {
 		return nil, ErrNilUpload
 	}
@@ -156,7 +201,7 @@ func (c *Client) ResumeUpload(u *Upload) (*Uploader, error) {
 }
 
 // CreateOrResumeUpload resumes the upload if already created or creates a new upload in the server.
-func (c *Client) CreateOrResumeUpload(u *Upload) (*Uploader, error) {
+func (c *UploadClient) CreateOrResumeUpload(u *Upload) (*Uploader, error) {
 	if u == nil {
 		return nil, ErrNilUpload
 	}
@@ -172,7 +217,7 @@ func (c *Client) CreateOrResumeUpload(u *Upload) (*Uploader, error) {
 	return nil, err
 }
 
-func (c *Client) uploadChunck(url string, body io.Reader, size int64, offset int64) (int64, error) {
+func (c *UploadClient) uploadChunck(url string, body io.Reader, size int64, offset int64) (int64, error) {
 	var method string
 
 	if !c.Config.OverridePatchMethod {
@@ -220,7 +265,7 @@ func (c *Client) uploadChunck(url string, body io.Reader, size int64, offset int
 	}
 }
 
-func (c *Client) getUploadOffset(url string) (int64, error) {
+func (c *UploadClient) getUploadOffset(url string) (int64, error) {
 	req, err := http.NewRequest("HEAD", url, nil)
 
 	if err != nil {
@@ -259,32 +304,4 @@ func newClientError(res *http.Response) ClientError {
 		Code: res.StatusCode,
 		Body: body,
 	}
-}
-
-func Start() error {
-	f, err := os.Open(ClientFlag.Uploadfile)
-	if err != nil {
-		return fmt.Errorf("打开目标文件失败: %w", err)
-	}
-	defer f.Close()
-
-	client, err := NewClient(ClientFlag.Host, nil)
-	if err != nil {
-		return fmt.Errorf("tus client初始化失败: %w", err)
-	}
-	upload, err := NewUploadFromFile(f)
-	if err != nil {
-		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
-	}
-
-	uploader, err := client.CreateUpload(upload)
-	if err != nil {
-		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
-	}
-	err = uploader.Upload()
-	if err != nil {
-		return fmt.Errorf("tus client文件上传失败: %w", err)
-	}
-
-	return nil
 }
