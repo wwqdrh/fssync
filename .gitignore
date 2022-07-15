@@ -1,4 +1,5 @@
 .DS_Store
-.DEV.md
+DEV.md
 tests/testdata/store
 tests/testdata/uploadspec
+video.mp4

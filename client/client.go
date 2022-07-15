@@ -37,7 +37,7 @@ func Start() error {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
 
-	uploader, err := client.CreateUpload(upload)
+	uploader, err := client.CreateOrResumeUpload(upload)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}

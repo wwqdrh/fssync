@@ -2,40 +2,63 @@ package tests
 
 import (
 	"context"
-	"sync"
+	"errors"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/suite"
 	"github.com/wwqdrh/fssync/client"
 	"github.com/wwqdrh/fssync/server"
 )
 
-func TestUploadFile(t *testing.T) {
+type UploadSuite struct {
+	suite.Suite
+
+	cancel context.CancelFunc
+}
+
+func TestUploadSuite(t *testing.T) {
+	suite.Run(t, &UploadSuite{})
+}
+
+func (s *UploadSuite) SetupTest() {
 	server.ServerFlag.Port = ":1080"
 	server.ServerFlag.Store = "./testdata/store"
 	server.ServerFlag.Urlpath = "/files/"
 
 	client.ClientFlag.Host = "http://127.0.0.1:1080/files/"
 	client.ClientFlag.SpecPath = "./testdata/uploadspec"
-	client.ClientFlag.Uploadfile = "./testdata/testupload.txt"
 
 	ctx, cancel := context.WithCancel(context.TODO())
-
-	wait := sync.WaitGroup{}
-	wait.Add(2)
+	s.cancel = cancel
 	go func() {
-		defer wait.Done()
 		if err := server.Start(ctx); err != nil {
-			t.Error(err)
+			s.T().Error(err)
 		}
 	}()
-	time.Sleep(5 * time.Second) // wait server start
-	go func() {
-		defer wait.Done()
-		defer cancel()
-		if err := client.Start(); err != nil {
-			t.Error(err)
-		}
-	}()
-	wait.Wait()
+}
+
+func (s *UploadSuite) TearDownTest() {
+	s.cancel()
+	time.Sleep(3 * time.Second) // wait quit
+}
+
+func (s *UploadSuite) TestCreateUploadFile() {
+	client.ClientFlag.Uploadfile = "./testdata/testupload.txt"
+	if err := client.Start(); err != nil {
+		s.T().Error(err)
+	}
+}
+
+func (s *UploadSuite) TestResumeUploadFile() {
+	_, err := os.Stat("./testdata/video.mp4")
+	if errors.Is(err, os.ErrNotExist) {
+		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")
+	}
+	client.ClientFlag.Uploadfile = "./testdata/video.mp4"
+
+	if err := client.Start(); err != nil {
+		s.T().Error(err)
+	}
 }
