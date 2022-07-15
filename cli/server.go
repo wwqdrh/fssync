@@ -36,9 +36,9 @@ var (
 )
 
 func init() {
-	ServerCmd.Flags().StringVar(&serverFlag.port, "端口", "1080", "目标端口")
-	ServerCmd.Flags().StringVar(&serverFlag.store, "保存路径", "./stores", "保存路径")
-	ServerCmd.Flags().StringVar(&serverFlag.urlpath, "url基础路径", "/files/", "url基础路径")
+	ServerCmd.Flags().StringVar(&serverFlag.port, "port", ":1080", "目标端口")
+	ServerCmd.Flags().StringVar(&serverFlag.store, "store", "./stores", "保存路径")
+	ServerCmd.Flags().StringVar(&serverFlag.urlpath, "baseurl", "/files/", "url基础路径")
 }
 
 func ServerStart() error {
@@ -65,9 +65,9 @@ func ServerStart() error {
 		}
 	}()
 
-	http.Handle("/files/", http.StripPrefix("/files/", handler))
-	logger.DefaultLogger.Info(":start on 8080")
-	err = http.ListenAndServe(":8080", nil)
+	http.Handle(serverFlag.urlpath, http.StripPrefix(serverFlag.urlpath, handler))
+	logger.DefaultLogger.Info(serverFlag.port)
+	err = http.ListenAndServe(serverFlag.port, nil)
 	if err != nil {
 		logger.DefaultLogger.Error(err.Error())
 		return err
