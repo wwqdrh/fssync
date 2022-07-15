@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/tus/tusd/pkg/filestore"
@@ -38,10 +39,14 @@ var (
 func init() {
 	ServerCmd.Flags().StringVar(&serverFlag.port, "port", ":1080", "目标端口")
 	ServerCmd.Flags().StringVar(&serverFlag.store, "store", "./stores", "保存路径")
-	ServerCmd.Flags().StringVar(&serverFlag.urlpath, "baseurl", "/files/", "url基础路径")
+	ServerCmd.Flags().StringVar(&serverFlag.urlpath, "baseurl", "/files", "url基础路径")
 }
 
 func ServerStart() error {
+	if err := os.MkdirAll(serverFlag.store, 0o777); err != nil {
+		return fmt.Errorf("创建保存路径失败: %w", err)
+	}
+
 	store := filestore.FileStore{
 		Path: serverFlag.store,
 	}
@@ -55,7 +60,7 @@ func ServerStart() error {
 	})
 	if err != nil {
 		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("创建tusd handler失败: %w", err)
 	}
 
 	go func() {
@@ -69,8 +74,7 @@ func ServerStart() error {
 	logger.DefaultLogger.Info(serverFlag.port)
 	err = http.ListenAndServe(serverFlag.port, nil)
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("服务退出出错: %w", err)
 	}
 	return nil
 }

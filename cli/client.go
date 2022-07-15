@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/eventials/go-tus"
@@ -48,31 +49,26 @@ func init() {
 func ClientStart() error {
 	f, err := os.Open(clientFlag.uploadfile)
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("打开目标文件失败: %w", err)
 	}
 	defer f.Close()
 
 	client, err := tus.NewClient(clientFlag.host, nil)
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("tus client初始化失败: %w", err)
 	}
 	upload, err := tus.NewUploadFromFile(f)
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
 
 	uploader, err := client.CreateUpload(upload)
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
 	err = uploader.Upload()
 	if err != nil {
-		logger.DefaultLogger.Error(err.Error())
-		return err
+		return fmt.Errorf("tus client文件上传失败: %w", err)
 	}
 
 	return nil
