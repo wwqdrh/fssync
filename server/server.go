@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"path"
+	"strconv"
+	"strings"
+	"syscall"
 
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
@@ -44,6 +49,7 @@ func Start(ctx context.Context) error {
 	}()
 
 	http.Handle(ServerFlag.Urlpath, http.StripPrefix(ServerFlag.Urlpath, handler))
+	registerAPI()
 
 	go func() {
 		logger.DefaultLogger.Info(ServerFlag.Port)
@@ -53,7 +59,75 @@ func Start(ctx context.Context) error {
 		}
 	}()
 
-	<-ctx.Done()
+	n := make(chan os.Signal, 1)
+	signal.Notify(n, syscall.SIGTERM, os.Interrupt)
+	select {
+	case <-ctx.Done():
+		return nil
+	case <-n:
+		return nil
+	}
+}
 
-	return nil
+////////////////////
+// extra api
+////////////////////
+func registerAPI() {
+	http.HandleFunc("/download/list", downloadList)
+	http.HandleFunc("/download/spec", downloadSpec)
+	http.HandleFunc("/download/truncate", downloadTruncate)
+}
+
+func downloadList(w http.ResponseWriter, r *http.Request) {
+	if ServerFlag.ExtraPath == "" {
+		w.Write([]byte("未设置extrapath目录"))
+		return
+	}
+
+	res, err := ListDirFile(ServerFlag.ExtraPath, false)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	} else {
+		w.Write([]byte(strings.Join(res, ",")))
+	}
+}
+
+func downloadSpec(w http.ResponseWriter, r *http.Request) {
+	filename := r.URL.Query().Get("file")
+	if filename == "" {
+		w.Write([]byte("未设置query参数file"))
+		return
+	}
+
+	res, err := GetFileSpecInfo(path.Join(ServerFlag.ExtraPath, filename), int(ServerFlag.ExtraTruncate))
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	} else {
+		w.Write([]byte(fmt.Sprint(res)))
+	}
+}
+
+func downloadTruncate(w http.ResponseWriter, r *http.Request) {
+	filename, trunc := r.URL.Query().Get("file"), r.URL.Query().Get("trunc")
+	if filename == "" || trunc == "" {
+		w.Write([]byte("未设置query参数file或者trunc"))
+		return
+	}
+
+	truncInt, err := strconv.ParseInt(trunc, 10, 64)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	data, err := GetFileData(path.Join(ServerFlag.ExtraPath, filename), truncInt*ServerFlag.ExtraTruncate, int(ServerFlag.ExtraTruncate))
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	} else {
+		w.Write(data)
+	}
 }
