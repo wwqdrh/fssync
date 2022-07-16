@@ -16,6 +16,9 @@ var (
 	ErrUploadNotFound    = errors.New("upload not found")
 	ErrResumeNotEnabled  = errors.New("resuming not enabled")
 	ErrFingerprintNotSet = errors.New("fingerprint not set")
+
+	ErrNilDownload      = errors.New("download can't be nil")
+	ErrDownloadNotFound = errors.New("download not found")
 )
 
 type ClientError struct {

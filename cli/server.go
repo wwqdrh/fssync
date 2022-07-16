@@ -34,4 +34,5 @@ func init() {
 	ServerCmd.Flags().StringVar(&server.ServerFlag.Port, "port", ":1080", "目标端口")
 	ServerCmd.Flags().StringVar(&server.ServerFlag.Store, "store", "./stores", "保存路径")
 	ServerCmd.Flags().StringVar(&server.ServerFlag.Urlpath, "baseurl", "/files/", "url基础路径")
+	ServerCmd.Flags().StringVar(&server.ServerFlag.ExtraPath, "extra", "", "提供直接下载的文件夹路径")
 }

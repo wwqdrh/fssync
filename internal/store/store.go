@@ -10,6 +10,6 @@ type UploadStore interface {
 type DownloadStore interface {
 	GetOffset(figerprint string) (int64, bool)
 	SetOffset(figerprint string, offset int64) error
-	Delete(fingerprint string)
-	Close()
+	Delete(fingerprint string) error
+	Close() error
 }

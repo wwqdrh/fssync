@@ -19,12 +19,12 @@ func TestCreateDownloader(t *testing.T) {
 		},
 	}
 
-	d, err := NewDownload("url1")
+	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath")
 	require.Nil(t, err)
 	client.CreateDownload(d)
 
 	// 判读是否存在
-	_, ok = st.GetOffset("url1")
+	_, ok = st.GetOffset(d.Fingerprint)
 	require.Equal(t, true, ok)
 }
 
@@ -33,7 +33,10 @@ func TestCreateOrResumeDownloader(t *testing.T) {
 	require.Nil(t, err)
 	st, ok := s.(store.DownloadStore)
 	require.Equal(t, true, ok)
-	st.SetOffset("url1", 10)
+
+	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath")
+	require.Nil(t, err)
+	st.SetOffset(d.Fingerprint, 10)
 
 	client := &DownloadClient{
 		Config: &DownloadConfig{
@@ -41,12 +44,9 @@ func TestCreateOrResumeDownloader(t *testing.T) {
 			Resume: true,
 		},
 	}
-
-	d, err := NewDownload("url1")
-	require.Nil(t, err)
 	_, err = client.ResumeDownload(d)
 	require.Nil(t, err)
 	// 判读是否存在
-	_, ok = st.GetOffset("url1")
+	_, ok = st.GetOffset(d.Fingerprint)
 	require.Equal(t, true, ok)
 }

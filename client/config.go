@@ -1,8 +1,17 @@
 package client
 
-var ClientFlag clientCmdFlag
+var ClientDownloadFlag clientDownloadCmdFlag
+var ClientUploadFlag clientUploadCmdFlag
 
-type clientCmdFlag struct {
+type clientDownloadCmdFlag struct {
+	Host         string
+	DownloadUrl  string
+	FileName     string
+	DownloadPath string
+	SpecPath     string
+}
+
+type clientUploadCmdFlag struct {
 	Host       string
 	Uploadfile string
 	SpecPath   string

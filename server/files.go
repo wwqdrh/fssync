@@ -92,9 +92,9 @@ func GetFileData(source string, offset int64, trucate int) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("移动seek失败: %w", err)
 	}
-	_, err = stream.Read(data)
+	n, err := stream.Read(data)
 	if err != nil {
 		return nil, fmt.Errorf("读取数据失败: %w", err)
 	}
-	return data, nil
+	return data[:n], nil
 }

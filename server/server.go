@@ -80,54 +80,76 @@ func registerAPI() {
 
 func downloadList(w http.ResponseWriter, r *http.Request) {
 	if ServerFlag.ExtraPath == "" {
-		w.Write([]byte("未设置extrapath目录"))
+		if _, err := w.Write([]byte("未设置extrapath目录")); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 		return
 	}
 
 	res, err := ListDirFile(ServerFlag.ExtraPath, false)
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	} else {
-		w.Write([]byte(strings.Join(res, ",")))
+		if _, err := w.Write([]byte(strings.Join(res, ","))); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	}
 }
 
 func downloadSpec(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("file")
 	if filename == "" {
-		w.Write([]byte("未设置query参数file"))
+		if _, err := w.Write([]byte("未设置query参数file")); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 		return
 	}
 
 	res, err := GetFileSpecInfo(path.Join(ServerFlag.ExtraPath, filename), int(ServerFlag.ExtraTruncate))
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	} else {
-		w.Write([]byte(fmt.Sprint(res)))
+		if _, err := w.Write([]byte(fmt.Sprint(res))); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	}
 }
 
 func downloadTruncate(w http.ResponseWriter, r *http.Request) {
 	filename, trunc := r.URL.Query().Get("file"), r.URL.Query().Get("trunc")
 	if filename == "" || trunc == "" {
-		w.Write([]byte("未设置query参数file或者trunc"))
+		if _, err := w.Write([]byte("未设置query参数file或者trunc")); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 		return
 	}
 
 	truncInt, err := strconv.ParseInt(trunc, 10, 64)
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 		return
 	}
 
 	data, err := GetFileData(path.Join(ServerFlag.ExtraPath, filename), truncInt*ServerFlag.ExtraTruncate, int(ServerFlag.ExtraTruncate))
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	} else {
-		w.Write(data)
+		w.Header().Add("Content-Type", "application/offset+octet-stream")
+		w.Header().Add("Content-Length", fmt.Sprint(len(data)))
+		if _, err := w.Write(data); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
 	}
 }

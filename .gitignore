@@ -2,4 +2,6 @@
 DEV.md
 tests/testdata/store
 tests/testdata/uploadspec
+internal/testdata/downloadpath
+internal/testdata/downloadstore
 video.mp4
