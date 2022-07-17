@@ -56,6 +56,9 @@ func (s *UploadSuite) TearDownSuite() {
 }
 
 func (s *UploadSuite) TestCreateUploadFile() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
 	client.ClientUploadFlag.Uploadfile = "./testdata/testupload.txt"
 	if err := client.UploadStart(); err != nil {
 		s.T().Error(err)
@@ -63,6 +66,9 @@ func (s *UploadSuite) TestCreateUploadFile() {
 }
 
 func (s *UploadSuite) TestResumeUploadFile() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
 	_, err := os.Stat("./testdata/video.mp4")
 	if errors.Is(err, os.ErrNotExist) {
 		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")

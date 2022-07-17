@@ -58,6 +58,9 @@ func (s *DownloadSuite) TearDownSuite() {
 }
 
 func (s *DownloadSuite) TestFileUrlList() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
 	req, err := http.NewRequest("GET", "http://127.0.0.1:1080/download/list", nil)
 	require.Nil(s.T(), err)
 	resp, err := http.DefaultClient.Do(req)
@@ -69,6 +72,9 @@ func (s *DownloadSuite) TestFileUrlList() {
 }
 
 func (s *DownloadSuite) TestCreateUploadFile() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
 	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
 	client.ClientDownloadFlag.FileName = "testdownload.txt"
 	client.ClientDownloadFlag.DownloadPath = "./testdata/downloadstore"
@@ -78,6 +84,9 @@ func (s *DownloadSuite) TestCreateUploadFile() {
 }
 
 func (s *DownloadSuite) TestResumeUploadFile() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
 	_, err := os.Stat("./testdata/video.mp4")
 	if errors.Is(err, os.ErrNotExist) {
 		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")
