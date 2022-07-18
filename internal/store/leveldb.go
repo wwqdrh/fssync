@@ -167,7 +167,7 @@ func (s *LeveldbStore) updateStatus(figerprint string) error {
 		if err := s.flushStatus(figerprint); err != nil {
 			return err
 		}
-		return err
+		return nil
 	}
 
 	statusStr := strings.Split(string(valByte), ",")
@@ -215,4 +215,19 @@ func (s *LeveldbStore) IsDone(figerprint string) bool {
 		}
 	}
 	return true
+}
+
+func (s *LeveldbStore) IsCombile(figerprint string) error {
+	valByte, err := s.db.Get([]byte(figerprint+"combiled"), nil)
+	if err != nil {
+		return err
+	}
+	if string(valByte) != "1" {
+		return errors.New("未合并")
+	}
+	return nil
+}
+
+func (s *LeveldbStore) SetCombile(figerprint string) error {
+	return s.db.Put([]byte(figerprint+"combiled"), []byte(fmt.Sprint(1)), nil)
 }

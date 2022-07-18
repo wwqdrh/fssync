@@ -125,10 +125,6 @@ func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteS
 	if err != nil {
 		return fmt.Errorf("读取响应失败: %w", err)
 	}
-	_, err = data.Seek(0, io.SeekEnd)
-	if err != nil {
-		return fmt.Errorf("移动游标到文件末尾失败: %w", err)
-	}
 
 	_, err = data.Write(resData)
 	if err != nil {

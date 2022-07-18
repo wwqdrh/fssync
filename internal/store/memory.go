@@ -15,6 +15,7 @@ var (
 type MemoryStore struct {
 	m map[string]interface{}
 
+	combiled     map[string]bool
 	maxOffset    map[string]int64 // 记录最大长度
 	chunckStatus map[string][]int // 1已分配但是未下载 0未下载 2已下载 获取chunck的状态 false未下载，true已下载
 	mutex        *sync.RWMutex
@@ -23,6 +24,7 @@ type MemoryStore struct {
 func NewMemoryStore() (interface{}, error) {
 	return &MemoryStore{
 		m:            make(map[string]interface{}),
+		combiled:     map[string]bool{},
 		maxOffset:    map[string]int64{},
 		chunckStatus: map[string][]int{},
 		mutex:        &sync.RWMutex{},
@@ -160,4 +162,16 @@ func (s *MemoryStore) IsDone(figerprint string) bool {
 		}
 	}
 	return true
+}
+
+func (s *MemoryStore) IsCombile(figerprint string) error {
+	if !s.combiled[figerprint] {
+		return errors.New("未合并")
+	}
+	return nil
+}
+
+func (s *MemoryStore) SetCombile(figerprint string) error {
+	s.combiled[figerprint] = true
+	return nil
 }

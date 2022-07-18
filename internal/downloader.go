@@ -33,6 +33,17 @@ func (d *Downloader) Offset() int64 {
 	return d.offset
 }
 
+// TODO 现在就ctrl+c的时候直接退出 新文件进行覆写
+// func (d *Downloader) waitExit() {
+// 	quit := make(chan os.Signal, 1)
+// 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+// 	go func() {
+// 		<-quit
+// 		println("wait the current downloading done")
+// 		if err := d.client.Config.Store.Close()
+// 	}()
+// }
+
 // 查看
 func (d *Downloader) Download() error {
 	maxTruncate, err := d.client.getmaxChunck(d.download.fileUrl, d.download.fileName)
@@ -90,11 +101,20 @@ func (d *Downloader) Download() error {
 	wg.Wait()
 
 	if d.client.Config.Store.IsDone(d.download.Fingerprint) {
-		fmt.Println("下载完成")
-		if err := d.download.MergeStream(maxTruncate); err != nil {
-			return err
+		if d.client.Config.Store.IsCombile(d.download.Fingerprint) != nil {
+			fmt.Println("下载完成")
+			// 未合并
+			if err := d.download.MergeStream(maxTruncate); err != nil {
+				return err
+			}
+			if err := d.client.Config.Store.SetCombile(d.download.Fingerprint); err != nil {
+				return err
+			}
+			fmt.Println("合并完成")
+		} else {
+			fmt.Println("已下载并合并完成")
 		}
-		fmt.Println("合并完成")
+
 	}
 
 	return nil

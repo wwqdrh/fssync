@@ -20,4 +20,6 @@ type DownloadStore interface {
 	SetOkOffset(figerprint string, offset int64) error // 并发安全 标记一个切片已经下载完成
 	SetFailOffset(figerprint string, offset int64) error
 	IsDone(figerprint string) bool // 判断是否下载完成
+	IsCombile(figerprint string) error
+	SetCombile(figerprint string) error
 }
