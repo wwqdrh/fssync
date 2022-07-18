@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/wwqdrh/fssync/internal/store"
@@ -83,7 +84,7 @@ func (c *DownloadClient) CreateOrResumeDownload(d *Download) (*Downloader, error
 }
 
 func (c *DownloadClient) getmaxChunck(baseurl, filename string) (int64, error) {
-	req, err := http.NewRequest("GET", baseurl+"/spec?file="+filename, nil)
+	req, err := http.NewRequest("GET", baseurl+"/spec?"+url.Values{"file": []string{filename}}.Encode(), nil)
 	if err != nil {
 		return -1, err
 	}
@@ -107,7 +108,7 @@ func (c *DownloadClient) getmaxChunck(baseurl, filename string) (int64, error) {
 
 // 下载切片 fileurl trunc第几个分片
 func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteSeeker, chunck int64) error {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/truncate?file=%s&trunc=%d", baseurl, filename, chunck), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/truncate?", baseurl)+url.Values{"file": []string{filename}, "trunc": []string{fmt.Sprint(chunck)}}.Encode(), nil)
 	if err != nil {
 		return err
 	}

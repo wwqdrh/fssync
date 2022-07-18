@@ -56,7 +56,10 @@ func UploadStart() error {
 }
 
 func DownloadStart() error {
-	s, err := store.NewLeveldbStore(ClientUploadFlag.SpecPath)
+	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
+		return fmt.Errorf("创建spec失败: %w", err)
+	}
+	s, err := store.NewLeveldbStore(ClientDownloadFlag.SpecPath)
 	if err != nil {
 		return fmt.Errorf("持久化组件初始化失败: %w", err)
 	}

@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/fssync.go",
+            "args": ["client", "download", "--host", "http://ec2-3-237-196-209.compute-1.amazonaws.com:9989/files/", "--url", "http://ec2-3-237-196-209.compute-1.amazonaws.com:9989/download", "--filename", "2021-05-03Amazon Search Terms_2021-05-03.csv", "--spec", "./storespec"]
+        }
+    ]
+}

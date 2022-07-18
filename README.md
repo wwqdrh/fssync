@@ -41,5 +41,5 @@ fssync --help
 
 fssync server --extra [路径]
 
-fssync client download --host [远程路径] --url [下载url] --filenam [下载文件名] --spec [分片信息保存路径]
+fssync client download --host [远程路径] --url [下载url] --filename [下载文件名] --spec [分片信息保存路径]
 ```

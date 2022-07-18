@@ -1,6 +1,10 @@
 package internal
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/wwqdrh/logger"
+)
 
 type Downloader struct {
 	client   *DownloadClient
@@ -28,6 +32,7 @@ func (d *Downloader) Download() error {
 	if err != nil {
 		return err
 	}
+	logger.DefaultLogger.Info("start chunck: " + fmt.Sprint(d.offset))
 	for d.offset < maxTruncate && !d.aborted {
 		err := d.client.downloadChunck(d.download.fileUrl, d.download.fileName, d.download.stream, d.offset)
 		if err != nil {
@@ -37,6 +42,7 @@ func (d *Downloader) Download() error {
 		if err := d.client.Config.Store.SetOffset(d.download.Fingerprint, d.offset); err != nil {
 			return fmt.Errorf("写回新offset失败: %w", err)
 		}
+		logger.DefaultLogger.Info(fmt.Sprintf("chunck: %d downloaded", d.offset))
 	}
 	return nil
 }

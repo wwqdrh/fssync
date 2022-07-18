@@ -51,6 +51,7 @@ func init() {
 
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.Host, "host", "", "目标地址 http://127.0.0.1:1080/files/")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.DownloadUrl, "url", "", "目标下载url http://127.0.0.1:1080/download")
+	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.DownloadPath, "dpath", ".", "目标下载路径")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.FileName, "filename", "", "目标下载文件名称 可从/download/list中查看")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.SpecPath, "spec", "", "文件的分片信息保存路径")
 
