@@ -9,6 +9,7 @@ type clientDownloadCmdFlag struct {
 	FileName     string
 	DownloadPath string
 	SpecPath     string
+	TempPath     string // 保存切片的临时目录
 }
 
 type clientUploadCmdFlag struct {

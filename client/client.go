@@ -59,6 +59,10 @@ func DownloadStart() error {
 	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
 		return fmt.Errorf("创建spec失败: %w", err)
 	}
+	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
+		return fmt.Errorf("创建temp失败: %w", err)
+	}
+
 	s, err := store.NewLeveldbStore(ClientDownloadFlag.SpecPath)
 	if err != nil {
 		return fmt.Errorf("持久化组件初始化失败: %w", err)
@@ -70,14 +74,15 @@ func DownloadStart() error {
 	defer v.Close()
 
 	client, err := internal.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &internal.DownloadConfig{
-		Resume: true,
-		Store:  v,
+		Resume:  true,
+		Store:   v,
+		TempDir: ClientDownloadFlag.TempPath,
 	})
 	if err != nil {
 		return fmt.Errorf("tus client初始化失败: %w", err)
 	}
 
-	download, err := internal.NewDownload(ClientDownloadFlag.DownloadUrl, ClientDownloadFlag.FileName, ClientDownloadFlag.DownloadPath)
+	download, err := internal.NewDownload(ClientDownloadFlag.DownloadUrl, ClientDownloadFlag.FileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}

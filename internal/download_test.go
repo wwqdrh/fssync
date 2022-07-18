@@ -19,7 +19,7 @@ func TestCreateDownloader(t *testing.T) {
 		},
 	}
 
-	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath")
+	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath", "./testdata/downloadtemp")
 	require.Nil(t, err)
 	client.CreateDownload(d)
 
@@ -34,7 +34,7 @@ func TestCreateOrResumeDownloader(t *testing.T) {
 	st, ok := s.(store.DownloadStore)
 	require.Equal(t, true, ok)
 
-	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath")
+	d, err := NewDownload("url1", "a.txt", "./testdata/downloadpath", "./testdata/downloadtemp")
 	require.Nil(t, err)
 	st.SetOffset(d.Fingerprint, 10)
 

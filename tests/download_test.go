@@ -31,6 +31,10 @@ func init() {
 
 	client.ClientUploadFlag.Host = "http://127.0.0.1:1080/files/"
 	client.ClientUploadFlag.SpecPath = "./testdata/uploadspec"
+
+	client.ClientDownloadFlag.DownloadPath = "./testdata/downloadstore"
+	client.ClientDownloadFlag.TempPath = "./testdata/temppath"
+	client.ClientDownloadFlag.SpecPath = "./testdata/downloadspec"
 }
 
 func TestDownloadSuite(t *testing.T) {
@@ -77,13 +81,12 @@ func (s *DownloadSuite) TestCreateUploadFile() {
 	}
 	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
 	client.ClientDownloadFlag.FileName = "testdownload.txt"
-	client.ClientDownloadFlag.DownloadPath = "./testdata/downloadstore"
 	if err := client.DownloadStart(); err != nil {
 		s.T().Error(err)
 	}
 }
 
-func (s *DownloadSuite) TestResumeUploadFile() {
+func (s *DownloadSuite) TestResumeDownloadFile() {
 	if os.Getenv("MODE") != "LOCAL" {
 		s.T().Skip("not local env, skip")
 	}
@@ -93,7 +96,6 @@ func (s *DownloadSuite) TestResumeUploadFile() {
 	}
 	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
 	client.ClientDownloadFlag.FileName = "video.mp4"
-	client.ClientDownloadFlag.DownloadPath = "./testdata/downloadstore"
 
 	if err := client.DownloadStart(); err != nil {
 		s.T().Error(err)

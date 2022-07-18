@@ -12,8 +12,9 @@ import (
 )
 
 type DownloadConfig struct {
-	Store  store.DownloadStore
-	Resume bool
+	Store   store.DownloadStore
+	Resume  bool
+	TempDir string
 }
 
 type DownloadClient struct {
@@ -107,6 +108,7 @@ func (c *DownloadClient) getmaxChunck(baseurl, filename string) (int64, error) {
 }
 
 // 下载切片 fileurl trunc第几个分片
+// 保存到临时文件夹下
 func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteSeeker, chunck int64) error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/truncate?", baseurl)+url.Values{"file": []string{filename}, "trunc": []string{fmt.Sprint(chunck)}}.Encode(), nil)
 	if err != nil {
