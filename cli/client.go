@@ -54,6 +54,7 @@ func init() {
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.DownloadPath, "dpath", ".", "目标下载路径")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.TempPath, "tmpath", ".", "切片路径")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.FileName, "filename", "./spec/temp", "目标下载文件名称 可从/download/list中查看")
+	ClientDownloadCmd.Flags().BoolVar(&client.ClientDownloadFlag.DownAll, "all", false, "下载目标连接中所有的文件")
 	ClientDownloadCmd.Flags().StringVar(&client.ClientDownloadFlag.SpecPath, "spec", "./spec/info", "文件的分片信息保存路径")
 
 	if err := ClientUploadCmd.MarkFlagRequired("host"); err != nil {

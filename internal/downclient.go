@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/wwqdrh/fssync/internal/store"
 )
@@ -18,14 +19,16 @@ type DownloadConfig struct {
 }
 
 type DownloadClient struct {
-	Config *DownloadConfig
-	client *http.Client
+	Config      *DownloadConfig
+	client      *http.Client
+	downloadUrl string
 }
 
 func NewDownloadClient(url string, config *DownloadConfig) (*DownloadClient, error) {
 	return &DownloadClient{
-		Config: config,
-		client: http.DefaultClient,
+		Config:      config,
+		client:      http.DefaultClient,
+		downloadUrl: url,
 	}, nil
 }
 
@@ -131,4 +134,23 @@ func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteS
 		return fmt.Errorf("写入文件失败: %w", err)
 	}
 	return nil
+}
+
+func (c *DownloadClient) FileList() ([]string, error) {
+	req, err := http.NewRequest("GET", c.downloadUrl+"/list", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(string(data), ","), nil
 }

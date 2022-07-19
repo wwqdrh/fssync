@@ -101,3 +101,15 @@ func (s *DownloadSuite) TestResumeDownloadFile() {
 		s.T().Error(err)
 	}
 }
+
+func (s *DownloadSuite) TestDownloadaAll() {
+	if os.Getenv("MODE") != "LOCAL" {
+		s.T().Skip("not local env, skip")
+	}
+	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
+	client.ClientDownloadFlag.DownAll = true
+
+	if err := client.DownloadStart(); err != nil {
+		s.T().Error(err)
+	}
+}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/wwqdrh/fssync/internal"
 	"github.com/wwqdrh/fssync/internal/store"
+	"github.com/wwqdrh/logger"
 )
 
 func UploadStart() error {
@@ -82,7 +83,26 @@ func DownloadStart() error {
 		return fmt.Errorf("tus client初始化失败: %w", err)
 	}
 
-	download, err := internal.NewDownload(ClientDownloadFlag.DownloadUrl, ClientDownloadFlag.FileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
+	if ClientDownloadFlag.DownAll {
+		fileList, err := client.FileList()
+		if err != nil {
+			return fmt.Errorf("获取下载列表失败: %w", err)
+		}
+		for _, item := range fileList {
+			if err := downloadOne(client, item); err != nil {
+				logger.DefaultLogger.Warn(err.Error())
+			} else {
+				logger.DefaultLogger.Info(item + "下载成功")
+			}
+		}
+		return nil
+	} else {
+		return downloadOne(client, ClientDownloadFlag.FileName)
+	}
+}
+
+func downloadOne(client *internal.DownloadClient, fileName string) error {
+	download, err := internal.NewDownload(ClientDownloadFlag.DownloadUrl, fileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
