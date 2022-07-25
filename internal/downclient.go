@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -153,4 +154,46 @@ func (c *DownloadClient) FileList() ([]string, error) {
 	}
 
 	return strings.Split(string(data), ","), nil
+}
+
+func (c *DownloadClient) GetMd5(baseUrl, filename string) (string, error) {
+	req, err := http.NewRequest("GET", baseUrl+"/md5?"+url.Values{"file": []string{filename}}.Encode(), nil)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("[DelFile] 请求失败: %w", err)
+	}
+	defer res.Body.Close()
+
+	resData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", fmt.Errorf("[DelFile] 读取响应失败: %w", err)
+	}
+	return string(resData), nil
+}
+
+// 发送调用，删除某个文件
+func (c *DownloadClient) DelFile(baseurl, filename string) error {
+	req, err := http.NewRequest("GET", baseurl+"/delete?"+url.Values{"file": []string{filename}}.Encode(), nil)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("[DelFile] 请求失败: %w", err)
+	}
+	defer res.Body.Close()
+
+	resData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("[DelFile] 读取响应失败: %w", err)
+	}
+	if string(resData) != "ok" {
+		return errors.New("删除失败")
+	}
+	return nil
 }

@@ -128,6 +128,12 @@ func (u *Download) MergeStream(maxChunck int64) error {
 	return u.DelTempDir()
 }
 
+// 清除所有错误文件，包括stream以及temp文件
+// stream不用，因为合并的时候会移动到0从新开始写入
+func (u *Download) ErrClean() error {
+	return u.DelTempDir()
+}
+
 func (u *Download) DelTempDir() error {
 	return os.RemoveAll(path.Join(u.tempPath, u.fileName))
 }

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -44,8 +45,8 @@ func (d *Downloader) Offset() int64 {
 // 	}()
 // }
 
-// 查看
-func (d *Downloader) Download() error {
+// 下载文件，isDel下载完成后是否删除远端的文件
+func (d *Downloader) Download(isDel bool) error {
 	maxTruncate, err := d.client.getmaxChunck(d.download.fileUrl, d.download.fileName)
 	if err != nil {
 		return err
@@ -102,20 +103,53 @@ func (d *Downloader) Download() error {
 
 	if d.client.Config.Store.IsDone(d.download.Fingerprint) {
 		if d.client.Config.Store.IsCombile(d.download.Fingerprint) != nil {
-			fmt.Println("下载完成")
-			// 未合并
-			if err := d.download.MergeStream(maxTruncate); err != nil {
-				return err
+			if err := d.MergeAndCheck(maxTruncate, isDel); err != nil {
+				return fmt.Errorf("[Download] 下载校验失败: %w", err)
+			} else {
+				if err := d.client.Config.Store.SetCombile(d.download.Fingerprint); err != nil {
+					return err
+				}
 			}
-			if err := d.client.Config.Store.SetCombile(d.download.Fingerprint); err != nil {
-				return err
-			}
-			fmt.Println("合并完成")
-		} else {
-			fmt.Println("已下载并合并完成")
 		}
-
 	}
 
 	return nil
+}
+
+// 注意: 如果isDel是true，那么说明远端文件会删除，也就是这里只能校验一次
+// 合并strem，校验md5，如果校验失败进行删除,
+// isDel 如果校验成功是否删除远程文件
+func (d *Downloader) MergeAndCheck(maxTruncate int64, isDel bool) error {
+	if err := d.download.MergeStream(maxTruncate); err != nil {
+		return err
+	}
+
+	if err := d.CheckMd5(d.download.Fingerprint); err != nil {
+		// 校验失败，删除
+		return d.download.ErrClean()
+	}
+
+	if isDel {
+		if err := d.client.DelFile(d.download.fileUrl, d.download.fileName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (d *Downloader) CheckMd5(fingerprint string) error {
+	md5, err := d.client.GetMd5(d.download.fileUrl, d.download.fileName)
+	if err != nil {
+		return err
+	}
+
+	localMd5, err := FileMd5BySpec(d.download.localPath)
+	if err != nil {
+		return err
+	}
+	if md5 == localMd5 {
+		return nil
+	}
+	return errors.New("md5校验失败")
 }

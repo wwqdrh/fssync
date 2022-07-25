@@ -13,6 +13,7 @@ import (
 
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
+	"github.com/wwqdrh/fssync/internal"
 	"github.com/wwqdrh/logger"
 )
 
@@ -75,7 +76,9 @@ func Start(ctx context.Context) error {
 func registerAPI() {
 	http.HandleFunc("/download/list", downloadList)
 	http.HandleFunc("/download/spec", downloadSpec)
+	http.HandleFunc("/download/md5", downloadMd5)
 	http.HandleFunc("/download/truncate", downloadTruncate)
+	http.HandleFunc("/download/delete", downloadDelete)
 }
 
 func downloadList(w http.ResponseWriter, r *http.Request) {
@@ -121,6 +124,22 @@ func downloadSpec(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func downloadMd5(w http.ResponseWriter, r *http.Request) {
+	filename := r.URL.Query().Get("file")
+	md5, err := internal.FileMd5BySpec(path.Join(ServerFlag.ExtraPath, filename))
+	if err != nil {
+		w.WriteHeader(400)
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
+		return
+	}
+
+	if _, err := w.Write([]byte(md5)); err != nil {
+		logger.DefaultLogger.Error(err.Error())
+	}
+}
+
 func downloadTruncate(w http.ResponseWriter, r *http.Request) {
 	filename, trunc := r.URL.Query().Get("file"), r.URL.Query().Get("trunc")
 	if filename == "" || trunc == "" {
@@ -151,5 +170,20 @@ func downloadTruncate(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write(data); err != nil {
 			logger.DefaultLogger.Error(err.Error())
 		}
+	}
+}
+
+func downloadDelete(w http.ResponseWriter, r *http.Request) {
+	filename := r.URL.Query().Get("file")
+	if err := os.Remove(path.Join(ServerFlag.ExtraPath, filename)); err != nil {
+		w.WriteHeader(400)
+		if _, err := w.Write([]byte(err.Error())); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
+		return
+	}
+
+	if _, err := w.Write([]byte("ok")); err != nil {
+		logger.DefaultLogger.Error(err.Error())
 	}
 }

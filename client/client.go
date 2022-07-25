@@ -111,7 +111,7 @@ func downloadOne(client *internal.DownloadClient, fileName string) error {
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
-	err = downloader.Download()
+	err = downloader.Download(ClientDownloadFlag.IsDel)
 	if err != nil {
 		return fmt.Errorf("tus client文件上传失败: %w", err)
 	}
