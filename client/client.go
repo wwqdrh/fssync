@@ -92,7 +92,7 @@ func DownloadStart() error {
 			if err := downloadOne(client, item); err != nil {
 				logger.DefaultLogger.Warn(err.Error())
 			} else {
-				logger.DefaultLogger.Info(item + "下载成功")
+				logger.DefaultLogger.Debug(item + "下载成功")
 			}
 		}
 		return nil

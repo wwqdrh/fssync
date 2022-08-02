@@ -72,7 +72,7 @@ func (d *Downloader) Download(isDel bool) error {
 				wg.Done()
 				<-ch
 			}()
-			logger.DefaultLogger.Info("start chunck: " + fmt.Sprint(i))
+			logger.DefaultLogger.Debug("start chunck: " + fmt.Sprint(i))
 			stream, err := d.download.ChunckStream(i)
 			if err != nil {
 				logger.DefaultLogger.Error("创建stream失败: " + fmt.Sprint(i))
@@ -96,7 +96,7 @@ func (d *Downloader) Download(isDel bool) error {
 					return
 				}
 			}
-			logger.DefaultLogger.Info(fmt.Sprintf("chunck: %d downloaded", i))
+			logger.DefaultLogger.Debug(fmt.Sprintf("chunck: %d downloaded", i))
 		}(val)
 	}
 	wg.Wait()

@@ -42,7 +42,7 @@ func Start(ctx context.Context) error {
 		for {
 			select {
 			case event := <-handler.CompleteUploads:
-				logger.DefaultLogger.Info(fmt.Sprintf("Upload %s finished\n", event.Upload.ID))
+				logger.DefaultLogger.Debug(fmt.Sprintf("Upload %s finished\n", event.Upload.ID))
 			case <-ctx.Done():
 				return
 			}

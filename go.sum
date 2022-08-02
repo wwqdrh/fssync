@@ -315,6 +315,10 @@ github.com/tus/tusd v1.9.0/go.mod h1:Bfji+3c6/7FVD7/nK/W9fM7h83d3ILTNWOc6aClR8lo
 github.com/vimeo/go-util v1.4.1/go.mod h1:r+yspV//C48HeMXV8nEvtUeNiIiGfVv3bbEHzOgudwE=
 github.com/wwqdrh/logger v0.0.1 h1:R5AChxngVISdL1fPYcQ9shyYBsuL0H5M8qrdH7xxBNI=
 github.com/wwqdrh/logger v0.0.1/go.mod h1:yNLPMyCnmN+laPdp70PX8sicplldo3ZO5N3csbmSLsc=
+github.com/wwqdrh/logger v0.0.2 h1:JY9Y9iA6o+dQclFtYPdz7G/MWvUo7KHXsC8naoYzCg8=
+github.com/wwqdrh/logger v0.0.2/go.mod h1:yNLPMyCnmN+laPdp70PX8sicplldo3ZO5N3csbmSLsc=
+github.com/wwqdrh/logger v0.0.3-0.20220725085320-517a234ea9aa h1:tNDfVM4NE+HOSO6DpSqtVo3ShvUsaKz8oGKlc/x5++w=
+github.com/wwqdrh/logger v0.0.3-0.20220725085320-517a234ea9aa/go.mod h1:yNLPMyCnmN+laPdp70PX8sicplldo3ZO5N3csbmSLsc=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

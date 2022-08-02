@@ -7,7 +7,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tus/tusd v1.9.0
-	github.com/wwqdrh/logger v0.0.1
+	github.com/wwqdrh/logger v0.0.3-0.20220725085320-517a234ea9aa
 )
 
 require (
