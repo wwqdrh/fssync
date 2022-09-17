@@ -1,15 +1,12 @@
 package tests
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -19,8 +16,6 @@ import (
 
 type DownloadSuite struct {
 	suite.Suite
-
-	cancel context.CancelFunc
 }
 
 func init() {
@@ -32,6 +27,7 @@ func init() {
 	client.ClientUploadFlag.Host = "http://127.0.0.1:1080/files/"
 	client.ClientUploadFlag.SpecPath = "./testdata/uploadspec"
 
+	client.ClientUploadFlag.Host = "http://127.0.0.1:1080/files/"
 	client.ClientDownloadFlag.DownloadPath = "./testdata/downloadstore"
 	client.ClientDownloadFlag.TempPath = "./testdata/temppath"
 	client.ClientDownloadFlag.SpecPath = "./testdata/downloadspec"
@@ -41,30 +37,7 @@ func TestDownloadSuite(t *testing.T) {
 	suite.Run(t, &DownloadSuite{})
 }
 
-func (s *DownloadSuite) SetupSuite() {
-	go func() {
-		if v := atomic.AddInt64(&f, 1); v == 1 {
-			ctx, cancel := context.WithCancel(context.TODO())
-			s.cancel = cancel
-			if err := server.Start(ctx); err != nil {
-				s.T().Error(err)
-			}
-		}
-	}()
-	time.Sleep(3 * time.Second) // wait start
-}
-
-func (s *DownloadSuite) TearDownSuite() {
-	if s.cancel != nil {
-		s.cancel()
-		time.Sleep(3 * time.Second) // wait quit
-	}
-}
-
 func (s *DownloadSuite) TestFileUrlList() {
-	if os.Getenv("MODE") != "LOCAL" {
-		s.T().Skip("not local env, skip")
-	}
 	req, err := http.NewRequest("GET", "http://127.0.0.1:1080/download/list", nil)
 	require.Nil(s.T(), err)
 	resp, err := http.DefaultClient.Do(req)
@@ -76,10 +49,7 @@ func (s *DownloadSuite) TestFileUrlList() {
 }
 
 func (s *DownloadSuite) TestCreateUploadFile() {
-	if os.Getenv("MODE") != "LOCAL" {
-		s.T().Skip("not local env, skip")
-	}
-	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
+	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080"
 	client.ClientDownloadFlag.FileName = "testdownload.txt"
 	if err := client.DownloadStart(); err != nil {
 		s.T().Error(err)
@@ -87,14 +57,11 @@ func (s *DownloadSuite) TestCreateUploadFile() {
 }
 
 func (s *DownloadSuite) TestResumeDownloadFile() {
-	if os.Getenv("MODE") != "LOCAL" {
-		s.T().Skip("not local env, skip")
-	}
 	_, err := os.Stat("./testdata/video.mp4")
 	if errors.Is(err, os.ErrNotExist) {
 		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")
 	}
-	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
+	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080"
 	client.ClientDownloadFlag.FileName = "video.mp4"
 
 	if err := client.DownloadStart(); err != nil {
@@ -103,10 +70,7 @@ func (s *DownloadSuite) TestResumeDownloadFile() {
 }
 
 func (s *DownloadSuite) TestDownloadaAll() {
-	if os.Getenv("MODE") != "LOCAL" {
-		s.T().Skip("not local env, skip")
-	}
-	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080/download"
+	client.ClientDownloadFlag.DownloadUrl = "http://localhost:1080"
 	client.ClientDownloadFlag.DownAll = true
 
 	if err := client.DownloadStart(); err != nil {

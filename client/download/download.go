@@ -1,6 +1,7 @@
-package internal
+package download
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,10 @@ import (
 	"path"
 	"strings"
 )
+
+func b64encode(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
+}
 
 type downloadMeta map[string]string
 

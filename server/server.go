@@ -74,11 +74,11 @@ func Start(ctx context.Context) error {
 // extra api
 ////////////////////
 func registerAPI() {
-	http.HandleFunc("/download/list", downloadList)
-	http.HandleFunc("/download/spec", downloadSpec)
-	http.HandleFunc("/download/md5", downloadMd5)
-	http.HandleFunc("/download/truncate", downloadTruncate)
-	http.HandleFunc("/download/delete", downloadDelete)
+	http.HandleFunc(internal.PDownloadList.ServerUrl(), downloadList)
+	http.HandleFunc(internal.PDownloadSpec.ServerUrl(), downloadSpec)
+	http.HandleFunc(internal.PDownloadMd5.ServerUrl(), downloadMd5)
+	http.HandleFunc(internal.PDownloadTrucate.ServerUrl(), downloadTruncate)
+	http.HandleFunc(internal.PDownloadDelete.ServerUrl(), downloadDelete)
 }
 
 func downloadList(w http.ResponseWriter, r *http.Request) {

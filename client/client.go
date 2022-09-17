@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/wwqdrh/fssync/internal"
+	"github.com/wwqdrh/fssync/client/download"
+	"github.com/wwqdrh/fssync/client/upload"
 	"github.com/wwqdrh/fssync/internal/store"
 	"github.com/wwqdrh/logger"
 )
@@ -28,7 +29,7 @@ func UploadStart() error {
 	}
 	defer v.Close()
 
-	client, err := internal.NewUploadClient(ClientUploadFlag.Host, &internal.UploadConfig{
+	client, err := upload.NewUploadClient(ClientUploadFlag.Host, &upload.UploadConfig{
 		ChunkSize:           2 * 1024 * 1024,
 		Resume:              true,
 		OverridePatchMethod: true,
@@ -39,12 +40,12 @@ func UploadStart() error {
 	if err != nil {
 		return fmt.Errorf("tus client初始化失败: %w", err)
 	}
-	upload, err := internal.NewUploadFromFile(f)
+	up, err := upload.NewUploadFromFile(f)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
 
-	uploader, err := client.CreateOrResumeUpload(upload)
+	uploader, err := client.CreateOrResumeUpload(up)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}
@@ -74,7 +75,7 @@ func DownloadStart() error {
 	}
 	defer v.Close()
 
-	client, err := internal.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &internal.DownloadConfig{
+	client, err := download.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &download.DownloadConfig{
 		Resume:  true,
 		Store:   v,
 		TempDir: ClientDownloadFlag.TempPath,
@@ -101,8 +102,8 @@ func DownloadStart() error {
 	}
 }
 
-func downloadOne(client *internal.DownloadClient, fileName string) error {
-	download, err := internal.NewDownload(ClientDownloadFlag.DownloadUrl, fileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
+func downloadOne(client *download.DownloadClient, fileName string) error {
+	download, err := download.NewDownload(ClientDownloadFlag.DownloadUrl, fileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
 	if err != nil {
 		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
 	}

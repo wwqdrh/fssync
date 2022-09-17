@@ -1,4 +1,4 @@
-package internal
+package download
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/wwqdrh/fssync/internal"
 	"github.com/wwqdrh/logger"
 )
 
@@ -144,7 +145,7 @@ func (d *Downloader) CheckMd5(fingerprint string) error {
 		return err
 	}
 
-	localMd5, err := FileMd5BySpec(d.download.localPath)
+	localMd5, err := internal.FileMd5BySpec(d.download.localPath)
 	if err != nil {
 		return err
 	}

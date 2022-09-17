@@ -6,11 +6,12 @@ downloadspec
 downloadstore
 temppath
 tests/testdata/downtemp
-internal/testdata/downloadpath
-internal/testdata/downloadtemp
+downloadpath
+downloadtemp
 internal/testdata/downloadstore
 video.mp4
 storespec
 *.csv
 internal/store/testdata/leveldb
 temp
+.tmp
