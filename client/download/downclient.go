@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -101,7 +100,7 @@ func (c *DownloadClient) getmaxChunck(baseurl, filename string) (int64, error) {
 	}
 	defer res.Body.Close()
 
-	resData, err := ioutil.ReadAll(res.Body)
+	resData, err := io.ReadAll(res.Body)
 	if err != nil {
 		return -1, fmt.Errorf("读取响应失败: %w", err)
 	}
@@ -126,7 +125,7 @@ func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteS
 	}
 	defer res.Body.Close()
 
-	resData, err := ioutil.ReadAll(res.Body)
+	resData, err := io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("读取响应失败: %w", err)
 	}
@@ -149,7 +148,7 @@ func (c *DownloadClient) FileList() ([]string, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +168,7 @@ func (c *DownloadClient) GetMd5(baseUrl, filename string) (string, error) {
 	}
 	defer res.Body.Close()
 
-	resData, err := ioutil.ReadAll(res.Body)
+	resData, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", fmt.Errorf("[DelFile] 读取响应失败: %w", err)
 	}
@@ -189,7 +188,7 @@ func (c *DownloadClient) DelFile(baseurl, filename string) error {
 	}
 	defer res.Body.Close()
 
-	resData, err := ioutil.ReadAll(res.Body)
+	resData, err := io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("[DelFile] 读取响应失败: %w", err)
 	}

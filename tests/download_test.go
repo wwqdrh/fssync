@@ -3,7 +3,7 @@ package tests
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"testing"
@@ -43,7 +43,7 @@ func (s *DownloadSuite) TestFileUrlList() {
 	resp, err := http.DefaultClient.Do(req)
 	require.Nil(s.T(), err)
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	require.Nil(s.T(), err)
 	fmt.Println(string(data))
 }

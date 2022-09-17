@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -22,7 +21,7 @@ func ListDirFile(source string, prefix bool) ([]string, error) {
 		cur := dirStack[0]
 		dirStack = dirStack[1:]
 
-		files, err := ioutil.ReadDir(cur)
+		files, err := os.ReadDir(cur)
 		if err != nil {
 			logger.DefaultLogger.Warn(cur + " 不是文件夹")
 			continue

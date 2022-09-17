@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -17,7 +17,7 @@ func TestDownloadList(t *testing.T) {
 	req := httptest.NewRequest("GET", "/download/list", nil)
 	downloadList(res, req)
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	fmt.Println(string(body))
 }
@@ -30,7 +30,7 @@ func TestDownloadSpec(t *testing.T) {
 	req := httptest.NewRequest("GET", "/download/spec?file=a.txt", nil)
 	downloadSpec(res, req)
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	fmt.Println(string(body))
 }
@@ -42,14 +42,14 @@ func TestDownloadMd5(t *testing.T) {
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/?file=a.txt", nil)
 	downloadMd5(res, req)
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	md51 := string(body)
 
 	res = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/download/?file=a.txt", nil)
 	downloadMd5(res, req)
-	body, err = ioutil.ReadAll(res.Body)
+	body, err = io.ReadAll(res.Body)
 	require.Nil(t, err)
 	md52 := string(body)
 
@@ -64,7 +64,7 @@ func TestDownloadTruncate(t *testing.T) {
 	req := httptest.NewRequest("GET", "/download/truncate?file=a.txt&trunc=0", nil)
 	downloadTruncate(res, req)
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	fmt.Println(string(body))
 }
@@ -87,7 +87,7 @@ func TestDownloadDelete(t *testing.T) {
 	req := httptest.NewRequest("GET", "/download/delete?file=temp.txt", nil)
 	downloadDelete(res, req)
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	fmt.Println(string(body))
 }

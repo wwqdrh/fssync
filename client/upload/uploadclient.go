@@ -3,7 +3,6 @@ package upload
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	netUrl "net/url"
 	"strconv"
 
@@ -299,7 +298,7 @@ func (c *UploadClient) getUploadOffset(url string) (int64, error) {
 }
 
 func newClientError(res *http.Response) ClientError {
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	return ClientError{
 		Code: res.StatusCode,
 		Body: body,

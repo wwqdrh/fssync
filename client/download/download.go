@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -120,7 +119,7 @@ func (u *Download) MergeStream(maxChunck int64) error {
 		if err != nil {
 			return fmt.Errorf("打开文件失败: %w", err)
 		}
-		data, err := ioutil.ReadAll(f)
+		data, err := io.ReadAll(f)
 		if err != nil {
 			return fmt.Errorf("读取文件内容失败: %w", err)
 		}
