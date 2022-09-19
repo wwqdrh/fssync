@@ -8,6 +8,7 @@ TMP_COVERAGE := $(TMP_BASE)/coverage
 
 .PHONY: test
 test:
+	go vet $(GO_PKGS)
 	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
 	golangci-lint run ./...
 	
