@@ -12,4 +12,5 @@ type serverCmdFlag struct {
 
 func init() {
 	ServerFlag.ExtraTruncate = 1 * 1024 * 1024 // 1MB
+	ServerFlag.Urlpath = "/files"
 }

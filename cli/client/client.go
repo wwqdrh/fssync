@@ -1,20 +1,24 @@
-package tui
+package client
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type setstate func(state int) *clientView
+
 type clientView struct {
 	state    int
 	menu     clientMenuView
-	download clientDownloadView
+	upload   uploadView
+	download downloadView
 }
 
 func NewClientView() clientView {
 	m := clientView{}
 	m.menu = newClientMenuView(m.setState)
-	m.download = newClientDownloadView(m.setState)
+	m.upload = newUploadView(m.setState)
+	m.download = newDownloadView(m.setState)
 	return m
 }
 
@@ -31,8 +35,10 @@ func (c clientView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch c.state {
 	case 0:
 		return c.menu.Update(msg)
-	case 2:
+	case 1:
 		return c.download.Update(msg)
+	case 2:
+		return c.upload.Update(msg)
 	}
 
 	switch msg := msg.(type) {
@@ -49,8 +55,10 @@ func (c clientView) View() string {
 	switch c.state {
 	case 0:
 		return c.menu.View()
-	case 2:
+	case 1:
 		return c.download.View()
+	case 2:
+		return c.upload.View()
 	}
 
 	return "fssync"

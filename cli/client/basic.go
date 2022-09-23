@@ -1,4 +1,4 @@
-package tui
+package client
 
 import (
 	"github.com/charmbracelet/bubbles/list"
@@ -25,15 +25,15 @@ type clientMenuView struct {
 
 func newClientMenuView(stateFn func(state int) *clientView) clientMenuView {
 	items := []list.Item{
-		menuitem{title: "download", desc: "download file from server"},
-		menuitem{title: "upload", desc: "upload file to server"},
+		menuitem{title: "download"},
+		menuitem{title: "upload"},
 	}
 
 	m := clientMenuView{
-		list:    list.New(items, list.NewDefaultDelegate(), 0, 0),
+		list:    list.New(items, list.NewDefaultDelegate(), 0, 2),
 		stateFn: stateFn,
 	}
-	m.list.Title = "My Fave Things"
+	m.list.Title = "menu"
 	return m
 }
 
@@ -52,7 +52,7 @@ func (c clientMenuView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "up":
 			c.focusIndex--
 		case "enter":
-			home := c.stateFn(2)
+			home := c.stateFn(c.focusIndex + 1)
 			return home.Update(msg)
 		}
 		if msg.String() == "ctrl+c" {

@@ -1,4 +1,4 @@
-package tui
+package client
 
 import (
 	"fmt"
@@ -6,67 +6,52 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/wwqdrh/fssync/client"
+	"github.com/wwqdrh/logger"
 )
 
-var (
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle.Copy()
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle.Copy()
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Copy().Render("[ Submit ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
-)
-
-type clientDownloadView struct {
+type downloadView struct {
 	focusIndex int
-	inputs     []textinput.Model
-	defaultVal []string
+	inputs     []field
 	cursorMode textinput.CursorMode
-	stateFn    func(state int) *clientView
+	stateFn    setstate
 }
 
-func newClientDownloadView(stateFn func(state int) *clientView) clientDownloadView {
-	c := clientDownloadView{
-		inputs: make([]textinput.Model, 3),
-		defaultVal: []string{
-			"http://localhost:1080",
-			"./example.txt",
-			".",
-		},
-		stateFn: stateFn,
+func newDownloadView(fn setstate) downloadView {
+	v := downloadView{
+		inputs:  make([]field, 3),
+		stateFn: fn,
 	}
 
-	var t textinput.Model
-	for i := range c.inputs {
-		t = textinput.New()
-		t.CursorStyle = cursorStyle
-		t.CharLimit = 32
+	var t field
+	for i := range v.inputs {
+		t = field{
+			field: textinput.New(),
+		}
+		t.field.CursorStyle = cursorStyle
+		t.field.CharLimit = 32
 
 		switch i {
 		case 0:
-			t.Placeholder = " 服务端地址: http://localhost:1080"
-			t.Focus()
-			t.PromptStyle = focusedStyle
-			t.TextStyle = focusedStyle
+			t.field.Placeholder = " 服务端地址: http://localhost:1080"
+			t.field.Focus()
+			t.id = "host"
+			t.defaultvalue = "http://localhost:1080"
 		case 1:
-			t.Placeholder = " 上传的文件: ./example.txt"
-		case 2:
-			t.Placeholder = " 文件分片信息保存地址: ."
+			t.field.Placeholder = " 下载文件: ./example.txt"
+			t.id = "download"
 		}
-		c.inputs[i] = t
+		v.inputs[i] = t
 	}
-	return c
+
+	return v
 }
 
-func (c clientDownloadView) Init() tea.Cmd {
+func (c downloadView) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (c clientDownloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (c downloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -81,7 +66,7 @@ func (c clientDownloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			cmds := make([]tea.Cmd, len(c.inputs))
 			for i := range c.inputs {
-				cmds[i] = c.inputs[i].SetCursorMode(c.cursorMode)
+				cmds[i] = c.inputs[i].field.SetCursorMode(c.cursorMode)
 			}
 			return c, tea.Batch(cmds...)
 
@@ -92,6 +77,7 @@ func (c clientDownloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && c.focusIndex == len(c.inputs) {
+				c.StartServer()
 				return c, tea.Quit
 			}
 
@@ -112,15 +98,15 @@ func (c clientDownloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for i := 0; i <= len(c.inputs)-1; i++ {
 				if i == c.focusIndex {
 					// Set focused state
-					cmds[i] = c.inputs[i].Focus()
-					c.inputs[i].PromptStyle = focusedStyle
-					c.inputs[i].TextStyle = focusedStyle
+					cmds[i] = c.inputs[i].field.Focus()
+					c.inputs[i].field.PromptStyle = focusedStyle
+					c.inputs[i].field.TextStyle = focusedStyle
 					continue
 				}
 				// Remove focused state
-				c.inputs[i].Blur()
-				c.inputs[i].PromptStyle = noStyle
-				c.inputs[i].TextStyle = noStyle
+				c.inputs[i].field.Blur()
+				c.inputs[i].field.PromptStyle = noStyle
+				c.inputs[i].field.TextStyle = noStyle
 			}
 
 			return c, tea.Batch(cmds...)
@@ -133,23 +119,23 @@ func (c clientDownloadView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return c, cmd
 }
 
-func (c *clientDownloadView) updateInputs(msg tea.Msg) tea.Cmd {
+func (c *downloadView) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(c.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
 	// update all of them here without any further logic.
 	for i := range c.inputs {
-		c.inputs[i], cmds[i] = c.inputs[i].Update(msg)
+		c.inputs[i].field, cmds[i] = c.inputs[i].field.Update(msg)
 	}
 
 	return tea.Batch(cmds...)
 }
 
-func (c clientDownloadView) View() string {
+func (c downloadView) View() string {
 	var b strings.Builder
 
 	for i := range c.inputs {
-		b.WriteString(c.inputs[i].View())
+		b.WriteString(c.inputs[i].field.View())
 		if i < len(c.inputs)-1 {
 			b.WriteRune('\n')
 		}
@@ -166,4 +152,25 @@ func (c clientDownloadView) View() string {
 	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
 	return b.String()
+}
+
+func (c *downloadView) GetField(id string) string {
+	for _, item := range c.inputs {
+		if item.id == id {
+			if v := item.field.Value(); v != "" {
+				return v
+			}
+			return item.defaultvalue
+		}
+	}
+	return ""
+}
+
+func (c *downloadView) StartServer() {
+	client.ClientDownloadFlag.DownloadUrl = c.GetField("host")
+	client.ClientDownloadFlag.FileName = c.GetField("download")
+
+	if err := client.DownloadStart(); err != nil {
+		logger.DefaultLogger.Error(err.Error())
+	}
 }

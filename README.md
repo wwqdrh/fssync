@@ -37,9 +37,14 @@
 go install github.com/wwqdrh/fssync@latest
 
 fssync --help
+```
 
+### 使用
 
-fssync server --extra [路径]
+操作界面为tui，根据提示填写必要参数即可
 
-fssync client download --host [远程路径] --url [下载url] --filename [下载文件名] --spec [分片信息保存路径]
+```bash
+fssync -mode server
+
+fssync -mode client
 ```
