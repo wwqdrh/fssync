@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/wwqdrh/logger"
@@ -96,4 +97,15 @@ func GetFileData(source string, offset int64, trucate int) ([]byte, error) {
 		return nil, fmt.Errorf("读取数据失败: %w", err)
 	}
 	return data[:n], nil
+}
+
+func isSubDir(basePath, targetPath string) bool {
+	f, err := filepath.Rel(basePath, targetPath)
+	if err != nil {
+		return false
+	}
+	if strings.Index(f, "../") == 0 {
+		return false
+	}
+	return true
 }

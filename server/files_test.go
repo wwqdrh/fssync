@@ -63,3 +63,22 @@ func TestGetFileData(t *testing.T) {
 	require.Nil(t, err)
 	require.EqualValues(t, 100, len(res))
 }
+
+func TestIsSubDir(t *testing.T) {
+	tables := []struct {
+		cur    string
+		sub    string
+		expect bool
+	}{
+		{"testdata", "testdata/a.txt", true},
+		{"testdata", "testdata/../a.txt", false},
+		{"testdata", "testdata/a/../../a.txt", false},
+		{"testdata", "testdata/a/b/../a.txt", true},
+	}
+
+	for i, item := range tables {
+		if item.expect != isSubDir(item.cur, item.sub) {
+			t.Error(fmt.Sprintf("%d - 错误", i))
+		}
+	}
+}

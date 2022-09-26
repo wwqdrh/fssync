@@ -111,7 +111,14 @@ func downloadSpec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := GetFileSpecInfo(path.Join(ServerFlag.ExtraPath, filename), int(ServerFlag.ExtraTruncate))
+	targetFile := path.Join(ServerFlag.ExtraPath, filename)
+	if !isSubDir(ServerFlag.ExtraPath, targetFile) {
+		if _, err := w.Write([]byte("请输入正确的文件名")); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
+		return
+	}
+	res, err := GetFileSpecInfo(targetFile, int(ServerFlag.ExtraTruncate))
 	if err != nil {
 		w.WriteHeader(500)
 		if _, err := w.Write([]byte(err.Error())); err != nil {
