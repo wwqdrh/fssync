@@ -16,3 +16,4 @@ internal/store/testdata/leveldb
 temp
 .tmp
 tmp
+.vscode
