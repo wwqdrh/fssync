@@ -21,7 +21,7 @@
 
 
 [![Build Status](https://github.com/wwqdrh/fssync/actions/workflows/push.yml/badge.svg)](https://github.com/wwqdrh/fssync/actions)
-[![codecov](https://codecov.io/gh/wwqdrh/fssync/branch/main/graph/badge.svg?token=4WB420ZAIO)](https://codecov.io/gh/wwqdrh/fssync)
+[![codecov](https://codecov.io/gh/wwqdrh/fssync/branch/main/graph/badge.svg?token=0QUPXM08Z1)](https://codecov.io/gh/wwqdrh/fssync)
 
   </p>
 </div>
