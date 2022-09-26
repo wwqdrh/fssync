@@ -1,5 +1,6 @@
-<p align='center'>
-  <pre style="float:left;">
+<div align="center">
+  <p>
+      <pre style="float:center">
               .-')      .-')                      .-') _              
              ( OO ).   ( OO ).                   ( OO ) )             
    ,------. (_)---\_) (_)---\_)   ,--.   ,--.,--./ ,--,'     .-----.  
@@ -10,14 +11,21 @@
   \|  |_)   \       / \       /  `-./  /.__) |  | \   |   (_'  '--'\  
    `--'      `-----'   `-----'     `--'      `--'  `--'      `-----'  
   </pre>
-</p>
+  </p>
+  <p>
 
-<p align='center'>
+  <p align='center'>
 方便地<sup><em>FsSync</em></sup> 文件同步工具
 <br> 
 </p>
 
-<br>
+
+[![Build Status](https://github.com/wwqdrh/fssync/actions/workflows/push.yml/badge.svg)](https://github.com/wwqdrh/fssync/actions)
+[![codecov](https://codecov.io/gh/wwqdrh/fssync/branch/main/graph/badge.svg?token=4WB420ZAIO)](https://codecov.io/gh/wwqdrh/fssync)
+
+  </p>
+</div>
+
 
 ## 背景
 
