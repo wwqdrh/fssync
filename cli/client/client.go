@@ -8,10 +8,11 @@ import (
 type setstate func(state int) *clientView
 
 type clientView struct {
-	state    int
-	menu     clientMenuView
-	upload   uploadView
-	download downloadView
+	state        int
+	menu         clientMenuView
+	upload       uploadView
+	download     downloadView
+	downloadList downloadListView
 }
 
 func NewClientView() clientView {
@@ -19,6 +20,7 @@ func NewClientView() clientView {
 	m.menu = newClientMenuView(m.setState)
 	m.upload = newUploadView(m.setState)
 	m.download = newDownloadView(m.setState)
+	m.downloadList = newDownloadListView(m.setState)
 	return m
 }
 
@@ -38,6 +40,9 @@ func (c clientView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case 1:
 		return c.download.Update(msg)
 	case 2:
+		// c.downloadList.UpdateList()
+		return c.downloadList.Update(msg)
+	case 3:
 		return c.upload.Update(msg)
 	}
 
@@ -58,6 +63,8 @@ func (c clientView) View() string {
 	case 1:
 		return c.download.View()
 	case 2:
+		return c.downloadList.View()
+	case 3:
 		return c.upload.View()
 	}
 

@@ -118,3 +118,33 @@ func downloadOne(client *download.DownloadClient, fileName string) error {
 	}
 	return nil
 }
+
+func DownloadList() ([]string, error) {
+	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
+		return nil, fmt.Errorf("创建spec失败: %w", err)
+	}
+	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
+		return nil, fmt.Errorf("创建temp失败: %w", err)
+	}
+
+	s, err := store.NewLeveldbStore(ClientDownloadFlag.SpecPath)
+	if err != nil {
+		return nil, fmt.Errorf("持久化组件初始化失败: %w", err)
+	}
+	v, ok := s.(store.DownloadStore)
+	if !ok {
+		return nil, fmt.Errorf("持久化组件初始化失败: %w", errors.New("leveldb store未实现uploadStore接口"))
+	}
+	defer v.Close()
+
+	client, err := download.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &download.DownloadConfig{
+		Resume:  true,
+		Store:   v,
+		TempDir: ClientDownloadFlag.TempPath,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("tus client初始化失败: %w", err)
+	}
+
+	return client.FileList()
+}

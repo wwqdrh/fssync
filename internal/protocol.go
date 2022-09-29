@@ -10,6 +10,7 @@ const (
 	PDownloadMd5
 	PDownloadTrucate
 	PDownloadDelete
+	Unknown
 )
 
 func (p ProtocolUrl) ServerUrl() string {
@@ -48,7 +49,7 @@ func (p ProtocolUrl) ClientUrl(baseurl string, args url.Values) string {
 		if len(args) > 0 {
 			extra = "?" + args.Encode()
 		}
-		return baseurl + "/download/md5?" + extra
+		return baseurl + "/download/md5" + extra
 	case PDownloadTrucate:
 		extra := ""
 		if len(args) > 0 {
@@ -62,6 +63,6 @@ func (p ProtocolUrl) ClientUrl(baseurl string, args url.Values) string {
 		}
 		return baseurl + "/download/delete" + extra
 	default:
-		return "/404"
+		return baseurl + "/404"
 	}
 }
