@@ -33,6 +33,10 @@ func NewDownloadClient(url string, config *DownloadConfig) (*DownloadClient, err
 	}, nil
 }
 
+func (c *DownloadClient) Close() error {
+	return c.Config.Store.Close()
+}
+
 // 开始新的下载
 func (c *DownloadClient) CreateDownload(download *Download) (*Downloader, error) {
 	if err := c.Config.Store.SetOffset(download.Fingerprint, 0); err != nil {

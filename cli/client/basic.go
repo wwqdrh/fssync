@@ -22,8 +22,8 @@ func (i menuitem) Description() string { return i.desc }
 func (i menuitem) FilterValue() string { return i.title }
 
 type clientMenuView struct {
-	inputs      []field
-	inputsIndex int
+	inputs []field
+	// inputsIndex int
 
 	list       list.Model
 	focusIndex int
@@ -31,7 +31,7 @@ type clientMenuView struct {
 }
 
 func newClientMenuView(stateFn func(state int) *clientView) clientMenuView {
-	inputs := make([]field, 1)
+	inputs := make([]field, 2)
 	var t field
 	for i := range inputs {
 		t = field{
@@ -46,6 +46,11 @@ func newClientMenuView(stateFn func(state int) *clientView) clientMenuView {
 			t.field.Focus()
 			t.id = "host"
 			t.defaultvalue = "http://localhost:1080"
+			// case 1:
+			// 	t.field.Placeholder = " 下载路径: ."
+			// 	// t.field.Focus()
+			// 	t.id = "path"
+			// 	t.defaultvalue = "."
 		}
 		inputs[i] = t
 	}
@@ -76,14 +81,26 @@ func (c clientMenuView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return c, tea.Quit
-		case "down":
-			c.focusIndex++
-		case "up":
-			c.focusIndex--
+		case "up", "down":
+			if msg.String() == "up" {
+				c.focusIndex--
+			} else {
+				c.focusIndex++
+			}
+			// if c.focusIndex == 0 {
+			// 	c.inputs[0].field.Focus()
+			// 	c.inputs[1].field.Blur()
+			// } else if c.focusIndex == 1 {
+			// 	c.inputs[1].field.Focus()
+			// 	c.inputs[0].field.Blur()
+			// }
 		case "enter":
+			// if c.focusIndex >= 2 {
 			client.ClientDownloadFlag.DownloadUrl = c.GetField("host")
+			// client.ClientDownloadFlag.DownloadPath = c.GetField("path")
 			home := c.stateFn(c.focusIndex + 1)
 			return home.Update(msg)
+			// }
 		}
 		if msg.String() == "ctrl+c" {
 			return c, tea.Quit

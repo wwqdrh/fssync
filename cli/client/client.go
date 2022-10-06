@@ -1,8 +1,18 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	focusedStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	blurredStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	focusedButton = focusedStyle.Copy().Render("[ Submit ]")
+	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
 type setstate func(state int) *clientView
@@ -40,7 +50,7 @@ func (c clientView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case 1:
 		return c.download.Update(msg)
 	case 2:
-		// c.downloadList.UpdateList()
+		c.downloadList.UpdateList()
 		return c.downloadList.Update(msg)
 	case 3:
 		return c.upload.Update(msg)

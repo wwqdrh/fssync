@@ -21,7 +21,7 @@ type clientUploadCmdFlag struct {
 }
 
 func init() {
-	ClientDownloadFlag.DownloadPath = "."
+	ClientDownloadFlag.DownloadPath = "./tmp/downloaded"
 	ClientDownloadFlag.SpecPath = "./tmp/spec"
 	ClientDownloadFlag.TempPath = "./tmp/data"
 }

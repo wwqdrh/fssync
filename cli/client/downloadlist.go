@@ -2,77 +2,107 @@ package client
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/wwqdrh/fssync/client"
 )
 
-type fileitem struct {
-	title, desc string
-}
-
-func (i fileitem) Title() string       { return i.title }
-func (i fileitem) Description() string { return i.desc }
-func (i fileitem) FilterValue() string { return i.title }
-
 type downloadListView struct {
-	list       list.Model
-	focusIndex int
-	stateFn    func(state int) *clientView
+	choices  []string // items on the to-do list
+	cursor   int      // which to-do list item our cursor is pointing at
+	intool   bool
+	selected map[int]struct{} // which to-do items are selected
+	stateFn  func(state int) *clientView
 }
 
 func newDownloadListView(stateFn func(state int) *clientView) downloadListView {
-	items := []list.Item{
-		fileitem{title: "here"},
-		fileitem{title: "here2"},
-	}
-
 	m := downloadListView{
-		list:    list.New(items, list.NewDefaultDelegate(), 0, 2),
-		stateFn: stateFn,
+		choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+		selected: make(map[int]struct{}),
+		stateFn:  stateFn,
 	}
-	m.list.Title = "downloadlist"
 	return m
 }
 
 func (c downloadListView) Init() tea.Cmd {
-	return textinput.Blink
+	return nil
 }
 
 func (c downloadListView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c":
+		case "ctrl+c", "q":
 			return c, tea.Quit
 		case "down":
-			c.focusIndex++
+			if c.cursor < len(c.choices)-1 {
+				c.cursor++
+			} else {
+				c.intool = true
+			}
 		case "up":
-			c.focusIndex--
+			if c.cursor > 0 {
+				c.cursor--
+				c.intool = false
+			}
 		case "enter":
-			fmt.Println("下载")
+			if c.intool {
+				for _, err := range client.DownloadStartByList(c.selectedList()...) {
+					fmt.Println(err.Error())
+				}
+				fmt.Println("done...")
+			} else {
+				_, ok := c.selected[c.cursor]
+				if ok {
+					delete(c.selected, c.cursor)
+				} else {
+					c.selected[c.cursor] = struct{}{}
+				}
+			}
 		}
 		if msg.String() == "ctrl+c" {
 			return c, tea.Quit
 		}
-	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
-		c.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
-	var cmd tea.Cmd
-	c.list, cmd = c.list.Update(msg)
-	return c, cmd
+	return c, nil
 }
 
 func (c downloadListView) View() string {
-	var b strings.Builder
-	b.WriteString(c.list.View())
-	// c.UpdateList()
-	return b.String()
+	// The header
+	s := "What you want download?\n\n"
+
+	// Iterate over our choices
+	for i, choice := range c.choices {
+
+		// Is the cursor pointing at this choice?
+		cursor := " " // no cursor
+		if !c.intool && c.cursor == i {
+			cursor = ">" // cursor!
+		}
+
+		// Is this choice selected?
+		checked := " " // not selected
+		if _, ok := c.selected[i]; ok {
+			checked = "x" // selected!
+		}
+
+		// Render the row
+		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	}
+
+	// button
+	if c.intool {
+		s += fmt.Sprintf("\n%s\n", focusedButton)
+	} else {
+		s += fmt.Sprintf("\n%s\n", blurredButton)
+	}
+
+	// The footer
+	s += "\nPress q or quit to quit.\n"
+
+	// Send the UI for rendering
+	return s
 }
 
 func (c *downloadListView) UpdateList() {
@@ -80,10 +110,13 @@ func (c *downloadListView) UpdateList() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	items := make([]list.Item, 0, len(files))
-	for _, item := range files {
-		items = append(items, fileitem{title: item})
+	c.choices = files
+}
+
+func (c *downloadListView) selectedList() []string {
+	res := []string{}
+	for id := range c.selected {
+		res = append(res, c.choices[id])
 	}
-	c.list = list.New(items, list.NewDefaultDelegate(), 0, 10)
-	c.list.Title = "downloadlist"
+	return res
 }

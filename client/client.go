@@ -5,12 +5,42 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/wwqdrh/fssync/client/download"
 	"github.com/wwqdrh/fssync/client/upload"
 	"github.com/wwqdrh/fssync/internal/store"
 	"github.com/wwqdrh/logger"
 )
+
+func newClient() (*download.DownloadClient, error) {
+	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
+		return nil, fmt.Errorf("创建spec失败: %w", err)
+	}
+	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
+		return nil, fmt.Errorf("创建temp失败: %w", err)
+	}
+
+	s, err := store.NewLeveldbStore(ClientDownloadFlag.SpecPath)
+	if err != nil {
+		return nil, fmt.Errorf("持久化组件初始化失败: %w", err)
+	}
+	v, ok := s.(store.DownloadStore)
+	if !ok {
+		return nil, fmt.Errorf("持久化组件初始化失败: %w", errors.New("leveldb store未实现uploadStore接口"))
+	}
+	// defer v.Close()
+
+	client, err := download.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &download.DownloadConfig{
+		Resume:  true,
+		Store:   v,
+		TempDir: ClientDownloadFlag.TempPath,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("tus client初始化失败: %w", err)
+	}
+	return client, nil
+}
 
 func UploadStart() error {
 	f, err := os.Open(ClientUploadFlag.Uploadfile)
@@ -58,31 +88,11 @@ func UploadStart() error {
 }
 
 func DownloadStart() error {
-	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
-		return fmt.Errorf("创建spec失败: %w", err)
-	}
-	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
-		return fmt.Errorf("创建temp失败: %w", err)
-	}
-
-	s, err := store.NewLeveldbStore(ClientDownloadFlag.SpecPath)
+	client, err := newClient()
 	if err != nil {
-		return fmt.Errorf("持久化组件初始化失败: %w", err)
+		return err
 	}
-	v, ok := s.(store.DownloadStore)
-	if !ok {
-		return fmt.Errorf("持久化组件初始化失败: %w", errors.New("leveldb store未实现uploadStore接口"))
-	}
-	defer v.Close()
-
-	client, err := download.NewDownloadClient(ClientDownloadFlag.DownloadUrl, &download.DownloadConfig{
-		Resume:  true,
-		Store:   v,
-		TempDir: ClientDownloadFlag.TempPath,
-	})
-	if err != nil {
-		return fmt.Errorf("tus client初始化失败: %w", err)
-	}
+	defer client.Close()
 
 	if ClientDownloadFlag.DownAll {
 		fileList, err := client.FileList()
@@ -102,19 +112,39 @@ func DownloadStart() error {
 	}
 }
 
+func DownloadStartByList(files ...string) []error {
+	client, err := newClient()
+	if err != nil {
+		return []error{err}
+	}
+	defer client.Close()
+
+	errs := []error{}
+	for _, item := range files {
+		if err := downloadOne(client, item); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
 func downloadOne(client *download.DownloadClient, fileName string) error {
+	if err := os.MkdirAll(path.Dir(path.Join(ClientDownloadFlag.DownloadPath, fileName)), os.ModePerm); err != nil {
+		return err
+	}
+
 	download, err := download.NewDownload(ClientDownloadFlag.DownloadUrl, fileName, ClientDownloadFlag.DownloadPath, ClientDownloadFlag.TempPath)
 	if err != nil {
-		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
+		return fmt.Errorf("newdownload err %w", err)
 	}
 
 	downloader, err := client.CreateOrResumeDownload(download)
 	if err != nil {
-		return fmt.Errorf("tus client初始化文件上传失败: %w", err)
+		return fmt.Errorf("downlaoded err: %w", err)
 	}
 	err = downloader.Download(ClientDownloadFlag.IsDel)
 	if err != nil {
-		return fmt.Errorf("tus client文件上传失败: %w", err)
+		return fmt.Errorf("downloaded merge err: %w", err)
 	}
 	return nil
 }
