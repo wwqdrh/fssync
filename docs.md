@@ -9,4 +9,4 @@ Tus是用于可恢复文件上传的基于HTTP的开放协议。可恢复意味�
 • HEAD “/:id”，其实这里的”/:id”就是获取的url，这是获取offset用的，不过我针对于s3的一些储存增加了一些返回字段。
 • PATCH “/:id”，这就是传输文件的核心接口，直到真正上传完毕，patch接口才会关闭
 • GET “/:id”，顾名思义，这是读取文件或者就是下载作用。
-DELETE “/:id”，这就是删除文件的操作。![image](https://user-images.githubusercontent.com/35476523/198206755-323ce22f-2eae-463a-8bdd-89c2059cbf67.png)
+DELETE “/:id”，这就是删除文件的操作。
