@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/wwqdrh/fssync/internal"
-	"github.com/wwqdrh/logger"
+	"github.com/wwqdrh/gokit/logger"
 )
 
 const (

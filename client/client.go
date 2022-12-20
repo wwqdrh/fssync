@@ -10,7 +10,7 @@ import (
 	"github.com/wwqdrh/fssync/client/download"
 	"github.com/wwqdrh/fssync/client/upload"
 	"github.com/wwqdrh/fssync/internal/store"
-	"github.com/wwqdrh/logger"
+	"github.com/wwqdrh/gokit/logger"
 )
 
 func newClient() (*download.DownloadClient, error) {
