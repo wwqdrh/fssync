@@ -6,14 +6,14 @@ require (
 	github.com/charmbracelet/bubbles v0.14.0
 	github.com/charmbracelet/bubbletea v0.22.1
 	github.com/charmbracelet/lipgloss v0.5.0
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tus/tusd v1.9.0
-	github.com/wwqdrh/gokit/clitool v0.0.0-20230102093801-7bb324d937fb
-	github.com/wwqdrh/gokit/logger v0.0.0-20221227105002-01ff58dac304
-	github.com/wwqdrh/gokit/ostool v0.0.0-20230102093801-7bb324d937fb
-	gopkg.in/fsnotify.v1 v1.4.7
+	github.com/wwqdrh/gokit/clitool v0.0.0-20230102163428-53ee24d8b439
+	github.com/wwqdrh/gokit/logger v0.0.0-20230102163428-53ee24d8b439
+	github.com/wwqdrh/gokit/ostool v0.0.0-20230102163428-53ee24d8b439
 )
 
 require (
@@ -21,7 +21,6 @@ require (
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
@@ -38,9 +37,9 @@ require (
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	go.uber.org/zap v1.23.0 // indirect
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
+	go.uber.org/multierr v1.9.0 // indirect
+	go.uber.org/zap v1.24.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect

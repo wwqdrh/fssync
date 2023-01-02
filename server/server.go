@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/tus/tusd/pkg/filestore"
@@ -94,7 +95,7 @@ func (f *FileManager) Start(ctx context.Context) error {
 }
 
 func (f *FileManager) watchFileModify(ctx context.Context) error {
-	return ostool.RegisterNotify(ctx, ServerFlag.ExtraPath, func(e fsnotify.Event) {
+	return ostool.RegisterNotify(ctx, ServerFlag.ExtraPath, 1*time.Hour, func(e fsnotify.Event) {
 		if abs, err := filepath.Abs(e.Name); err != nil {
 			logger.DefaultLogger.Warn(err.Error())
 		} else {

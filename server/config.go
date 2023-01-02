@@ -34,4 +34,7 @@ func (c *serverCmdFlag) Init() {
 	if c.Store, err = filepath.Abs(c.Store); err != nil {
 		logger.DefaultLogger.Fatal(err.Error())
 	}
+
+	logger.DefaultLogger.Info(c.Store)
+	logger.DefaultLogger.Info(c.ExtraPath)
 }
