@@ -1,6 +1,18 @@
 package server
 
-var ServerFlag serverCmdFlag
+import (
+	"path/filepath"
+
+	"github.com/wwqdrh/gokit/logger"
+)
+
+var ServerFlag = serverCmdFlag{
+	Port:          1080,
+	ExtraTruncate: 1 * 1024 * 1024,
+	Urlpath:       "/files",
+	ExtraPath:     ".",
+	Store:         "./upload",
+}
 
 type serverCmdFlag struct {
 	Port          int
@@ -10,10 +22,16 @@ type serverCmdFlag struct {
 	ExtraTruncate int64  // 额外的直接下载的文件夹 分片的大小
 }
 
-func init() {
-	ServerFlag.Port = 1080
-	ServerFlag.ExtraTruncate = 1 * 1024 * 1024 // 1MB
-	ServerFlag.Urlpath = "/files"
-	ServerFlag.ExtraPath = "."
-	ServerFlag.Store = "./upload"
+func (c *serverCmdFlag) Init() {
+	var err error
+
+	if c.Urlpath, err = filepath.Abs(c.Urlpath); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
+	if c.ExtraPath, err = filepath.Abs(c.ExtraPath); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
+	if c.Store, err = filepath.Abs(c.Store); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
 }

@@ -1,6 +1,17 @@
 package client
 
-var ClientDownloadFlag clientDownloadCmdFlag
+import (
+	"path/filepath"
+
+	"github.com/wwqdrh/gokit/logger"
+)
+
+var ClientDownloadFlag = clientDownloadCmdFlag{
+	DownloadPath: ".",
+	SpecPath:     "./tmp/spec",
+	TempPath:     "./tmp/data",
+	Interval:     10,
+}
 var ClientUploadFlag clientUploadCmdFlag
 
 type clientDownloadCmdFlag struct {
@@ -22,9 +33,16 @@ type clientUploadCmdFlag struct {
 	SpecPath   string
 }
 
-func init() {
-	ClientDownloadFlag.DownloadPath = "."
-	ClientDownloadFlag.SpecPath = "./tmp/spec"
-	ClientDownloadFlag.TempPath = "./tmp/data"
-	ClientDownloadFlag.Interval = 10
+func (c *clientDownloadCmdFlag) Init() {
+	var err error
+
+	if c.DownloadPath, err = filepath.Abs(c.DownloadPath); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
+	if c.SpecPath, err = filepath.Abs(c.SpecPath); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
+	if c.TempPath, err = filepath.Abs(c.TempPath); err != nil {
+		logger.DefaultLogger.Fatal(err.Error())
+	}
 }

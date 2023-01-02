@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -32,6 +33,8 @@ func NewFileManager() *FileManager {
 }
 
 func (f *FileManager) Start(ctx context.Context) error {
+	ServerFlag.Init()
+
 	if err := os.MkdirAll(ServerFlag.Store, 0o777); err != nil {
 		return fmt.Errorf("创建保存路径失败: %w", err)
 	}
@@ -92,7 +95,11 @@ func (f *FileManager) Start(ctx context.Context) error {
 
 func (f *FileManager) watchFileModify(ctx context.Context) error {
 	return ostool.RegisterNotify(ctx, ServerFlag.ExtraPath, func(e fsnotify.Event) {
-		f.updateFile.Store(strings.TrimPrefix(e.Name, ServerFlag.ExtraPath), struct{}{})
+		if abs, err := filepath.Abs(e.Name); err != nil {
+			logger.DefaultLogger.Warn(err.Error())
+		} else {
+			f.updateFile.Store(strings.TrimPrefix(abs, ServerFlag.ExtraPath), struct{}{})
+		}
 	})
 }
 
@@ -115,7 +122,7 @@ func (f *FileManager) downloadUpdateList(w http.ResponseWriter, r *http.Request)
 
 	files := []string{}
 	f.updateFile.Range(func(key, value any) bool {
-		files = append(files, strings.TrimPrefix(key.(string), ServerFlag.ExtraPath))
+		files = append(files, key.(string))
 		return true
 	})
 	if _, err := w.Write([]byte(strings.Join(files, ","))); err != nil {

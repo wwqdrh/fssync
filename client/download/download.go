@@ -117,14 +117,14 @@ func (u *Download) CleanChuck() error {
 	return nil
 }
 
-func (u *Download) ChunckStream(chunck int64) (io.WriteSeeker, error) {
+func (u *Download) ChunckStream(chunck int64) (*os.File, io.WriteSeeker, error) {
 	f, err := os.OpenFile(path.Join(u.tempPath, u.fileName, fmt.Sprintf("%d.chunck", chunck)), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if err != nil {
-		return nil, fmt.Errorf("创建文件失败: %w", err)
+		return nil, nil, fmt.Errorf("创建文件失败: %w", err)
 	}
 
 	stream := io.WriteSeeker(f)
-	return stream, nil
+	return f, stream, nil
 }
 
 func (u *Download) MergeStream(maxChunck int64) error {

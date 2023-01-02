@@ -74,12 +74,13 @@ func (d *Downloader) Download(isDel bool) error {
 				<-ch
 			}()
 			logger.DefaultLogger.Debug("start chunck: " + fmt.Sprint(i))
-			stream, err := d.download.ChunckStream(i)
+			f, stream, err := d.download.ChunckStream(i)
 			if err != nil {
 				logger.DefaultLogger.Error("创建stream失败: " + fmt.Sprint(i))
 				atomic.AddInt64(&errTime, 1)
 				return
 			}
+			defer f.Close()
 
 			err = d.client.downloadChunck(d.download.fileUrl, d.download.fileName, stream, i)
 			if err != nil {

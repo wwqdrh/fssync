@@ -90,6 +90,8 @@ func UploadStart() error {
 }
 
 func DownloadStart() error {
+	ClientDownloadFlag.Init()
+
 	client, err := newClient()
 	if err != nil {
 		return err
