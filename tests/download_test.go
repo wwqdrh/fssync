@@ -19,7 +19,7 @@ type DownloadSuite struct {
 }
 
 func init() {
-	server.ServerFlag.Port = ":1080"
+	server.ServerFlag.Port = 1080
 	server.ServerFlag.Store = "./testdata/store"
 	server.ServerFlag.Urlpath = "/files/"
 	server.ServerFlag.ExtraPath = "./testdata/downloadextra"

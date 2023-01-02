@@ -39,6 +39,12 @@
 - 📦 客户端
 
 ## 使用手册
+
+### 注意事项
+
+- 使用相对路径作为参数
+- 客户端在下载文件的时候，无论是对于需要分片的大文件还是小文件都需要经过filespec获取分片信息以及filetrunc下载对应分片两步
+
 ### 安装
 
 ```bash
@@ -55,4 +61,12 @@ fssync --help
 fssync -mode server
 
 fssync -mode client
+```
+
+拉取服务端的文件夹
+
+```bash
+fssync server -d [需要开放的文件夹]
+
+fssync client download -h [服务端地址] --all
 ```

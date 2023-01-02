@@ -3,7 +3,7 @@ package server
 var ServerFlag serverCmdFlag
 
 type serverCmdFlag struct {
-	Port          string
+	Port          int
 	Store         string
 	Urlpath       string
 	ExtraPath     string // 额外的直接下载的文件夹
@@ -11,6 +11,9 @@ type serverCmdFlag struct {
 }
 
 func init() {
+	ServerFlag.Port = 1080
 	ServerFlag.ExtraTruncate = 1 * 1024 * 1024 // 1MB
 	ServerFlag.Urlpath = "/files"
+	ServerFlag.ExtraPath = "."
+	ServerFlag.Store = "./upload"
 }

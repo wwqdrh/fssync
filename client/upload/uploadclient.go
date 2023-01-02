@@ -8,7 +8,7 @@ import (
 
 	"net/http"
 
-	"github.com/wwqdrh/fssync/internal/store"
+	"github.com/wwqdrh/fssync/pkg/store"
 )
 
 const (

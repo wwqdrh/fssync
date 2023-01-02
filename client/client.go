@@ -9,7 +9,7 @@ import (
 
 	"github.com/wwqdrh/fssync/client/download"
 	"github.com/wwqdrh/fssync/client/upload"
-	"github.com/wwqdrh/fssync/internal/store"
+	"github.com/wwqdrh/fssync/pkg/store"
 	"github.com/wwqdrh/gokit/logger"
 )
 

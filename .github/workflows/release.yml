@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.18'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2.5.2
         with:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.18'
       - name: Install tparse
         # if: steps.cache-go-bin.outputs.cache-hit != 'true'
         run: go get github.com/mfridman/tparse
@@ -58,7 +58,7 @@ jobs:
       
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
+          go-version: '1.18'
       - name: Get OS and arch info
         run: |
           GOOSARCH=${{matrix.goosarch}}

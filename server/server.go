@@ -13,8 +13,9 @@ import (
 
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
-	"github.com/wwqdrh/fssync/internal"
+	"github.com/wwqdrh/fssync/pkg/protocol"
 	"github.com/wwqdrh/gokit/logger"
+	"github.com/wwqdrh/gokit/ostool/fileindex"
 )
 
 func Start(ctx context.Context) error {
@@ -53,8 +54,8 @@ func Start(ctx context.Context) error {
 	registerAPI()
 
 	go func() {
-		logger.DefaultLogger.Info(ServerFlag.Port)
-		err = http.ListenAndServe(ServerFlag.Port, nil)
+		logger.DefaultLogger.Info(fmt.Sprintf("start server on: %d", ServerFlag.Port))
+		err = http.ListenAndServe(fmt.Sprintf(":%d", ServerFlag.Port), nil)
 		if err != nil {
 			logger.DefaultLogger.Error(fmt.Sprintf("服务退出出错: %s", err.Error()))
 		}
@@ -74,11 +75,11 @@ func Start(ctx context.Context) error {
 // extra api
 ////////////////////
 func registerAPI() {
-	http.HandleFunc(internal.PDownloadList.ServerUrl(), downloadList)
-	http.HandleFunc(internal.PDownloadSpec.ServerUrl(), downloadSpec)
-	http.HandleFunc(internal.PDownloadMd5.ServerUrl(), downloadMd5)
-	http.HandleFunc(internal.PDownloadTrucate.ServerUrl(), downloadTruncate)
-	http.HandleFunc(internal.PDownloadDelete.ServerUrl(), downloadDelete)
+	http.HandleFunc(protocol.PDownloadList.ServerUrl(), downloadList)
+	http.HandleFunc(protocol.PDownloadSpec.ServerUrl(), downloadSpec)
+	http.HandleFunc(protocol.PDownloadMd5.ServerUrl(), downloadMd5)
+	http.HandleFunc(protocol.PDownloadTrucate.ServerUrl(), downloadTruncate)
+	http.HandleFunc(protocol.PDownloadDelete.ServerUrl(), downloadDelete)
 }
 
 func downloadList(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +90,7 @@ func downloadList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := ListDirFile(ServerFlag.ExtraPath, false)
+	res, err := fileindex.GetAllFile(ServerFlag.ExtraPath, false)
 	if err != nil {
 		w.WriteHeader(500)
 		if _, err := w.Write([]byte(err.Error())); err != nil {
@@ -112,7 +113,7 @@ func downloadSpec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	targetFile := path.Join(ServerFlag.ExtraPath, filename)
-	if !isSubDir(ServerFlag.ExtraPath, targetFile) {
+	if !fileindex.IsSubDir(ServerFlag.ExtraPath, targetFile) {
 		if _, err := w.Write([]byte("请输入正确的文件名")); err != nil {
 			logger.DefaultLogger.Error(err.Error())
 		}
@@ -133,7 +134,7 @@ func downloadSpec(w http.ResponseWriter, r *http.Request) {
 
 func downloadMd5(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("file")
-	md5, err := internal.FileMd5BySpec(path.Join(ServerFlag.ExtraPath, filename))
+	md5, err := fileindex.FileMd5BySpec(path.Join(ServerFlag.ExtraPath, filename))
 	if err != nil {
 		w.WriteHeader(400)
 		if _, err := w.Write([]byte(err.Error())); err != nil {

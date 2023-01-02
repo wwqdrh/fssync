@@ -5,48 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
-	"path/filepath"
-	"strings"
 
 	"github.com/wwqdrh/gokit/logger"
 )
-
-// source: ./testdata or testdata
-func ListDirFile(source string, prefix bool) ([]string, error) {
-	source = strings.TrimLeft(source, "./")
-	dirStack := []string{source}
-
-	res := []string{}
-	for len(dirStack) > 0 {
-		cur := dirStack[0]
-		dirStack = dirStack[1:]
-
-		files, err := os.ReadDir(cur)
-		if err != nil {
-			logger.DefaultLogger.Warn(cur + " 不是文件夹")
-			continue
-		}
-
-		for _, item := range files {
-			if item.IsDir() {
-				dirStack = append(dirStack, path.Join(cur, item.Name()))
-			} else {
-				res = append(res, path.Join(cur, item.Name()))
-			}
-		}
-	}
-
-	if !prefix {
-		for i := 0; i < len(res); i++ {
-			cur := strings.TrimPrefix(res[i], source)
-			cur = strings.TrimPrefix(cur, "/")
-			res[i] = cur
-		}
-	}
-
-	return res, nil
-}
 
 // 目标文件 分片大小
 func GetFileSpecInfo(source string, truncate int) (int64, error) {
@@ -97,15 +58,4 @@ func GetFileData(source string, offset int64, trucate int) ([]byte, error) {
 		return nil, fmt.Errorf("读取数据失败: %w", err)
 	}
 	return data[:n], nil
-}
-
-func isSubDir(basePath, targetPath string) bool {
-	f, err := filepath.Rel(basePath, targetPath)
-	if err != nil {
-		return false
-	}
-	if strings.Index(f, "../") == 0 {
-		return false
-	}
-	return true
 }

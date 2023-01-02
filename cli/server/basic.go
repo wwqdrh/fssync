@@ -163,7 +163,7 @@ func (c *basicView) GetField(id string) string {
 }
 
 func (c *basicView) StartServer() {
-	server.ServerFlag.Port = c.GetField("port")
+	// server.ServerFlag.Port = c.GetField("port")
 	server.ServerFlag.Store = c.GetField("stores")
 	server.ServerFlag.ExtraPath = c.GetField("download")
 

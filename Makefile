@@ -23,3 +23,7 @@ test:
 	@echo
 	@echo Open the coverage report
 	@echo open $(TMP_COVERAGE)/coverage.html
+
+.PYONY: dev
+dev:
+	go run . server -s ./examples/sample/stores -d ./examples/sample/data

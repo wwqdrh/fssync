@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/wwqdrh/fssync/internal/store"
+	"github.com/wwqdrh/fssync/pkg/store"
 )
 
 func TestCreateDownloader(t *testing.T) {
