@@ -33,7 +33,7 @@ jobs:
           go-version: '1.18'
       - name: Install tparse
         # if: steps.cache-go-bin.outputs.cache-hit != 'true'
-        run: go get github.com/mfridman/tparse
+        run: make tools
       - run: make test
       - name: Upload coverage reports to Codecov
         run: |

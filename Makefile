@@ -6,6 +6,14 @@ GO_TEST_FLAGS ?= -race -v
 TMP_BASE := .tmp
 TMP_COVERAGE := $(TMP_BASE)/coverage
 
+.PHONY: tools
+tools:
+	go install github.com/mfridman/tparse@latest
+
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
+
+	go install golang.org/x/tools/cmd/goimports@latest
+
 .PHONY: lint
 lint:
 	go vet $(GO_PKGS)
