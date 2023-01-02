@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wwqdrh/fssync/pkg/store"
 	"github.com/wwqdrh/fssync/pkg/protocol"
+	"github.com/wwqdrh/fssync/pkg/store"
 )
 
 type DownloadConfig struct {
@@ -51,6 +51,10 @@ func (c *DownloadClient) CreateDownload(download *Download) (*Downloader, error)
 	}, nil
 }
 
+func (c *DownloadClient) DeleteDownload(d *Download) error {
+	return c.Config.Store.Delete(d.Fingerprint)
+}
+
 // 恢复下载
 func (c *DownloadClient) ResumeDownload(d *Download) (*Downloader, error) {
 	if d == nil {
@@ -78,9 +82,19 @@ func (c *DownloadClient) ResumeDownload(d *Download) (*Downloader, error) {
 }
 
 // 开始新的或者恢复下载
-func (c *DownloadClient) CreateOrResumeDownload(d *Download) (*Downloader, error) {
+func (c *DownloadClient) CreateOrResumeDownload(d *Download, force bool) (*Downloader, error) {
 	if d == nil {
 		return nil, ErrNilUpload
+	}
+
+	if force {
+		// 将配置和trunc删除，用于定期更新文件
+		if err := c.DeleteDownload(d); err != nil {
+			return nil, err
+		}
+		if err := d.CleanChuck(); err != nil {
+			return nil, err
+		}
 	}
 
 	uploader, err := c.ResumeDownload(d)
@@ -143,6 +157,25 @@ func (c *DownloadClient) downloadChunck(baseurl, filename string, data io.WriteS
 
 func (c *DownloadClient) FileList() ([]string, error) {
 	req, err := http.NewRequest("GET", protocol.PDownloadList.ClientUrl(c.baseUrl, nil), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(string(data), ","), nil
+}
+
+func (c *DownloadClient) FileUpdateList() ([]string, error) {
+	req, err := http.NewRequest("GET", protocol.PDownloadUpdate.ClientUrl(c.baseUrl, nil), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ func TestDownloadList(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/list", nil)
-	downloadList(res, req)
+	NewFileManager().downloadList(res, req)
 
 	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
@@ -28,7 +28,7 @@ func TestDownloadSpec(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/spec?file=a.txt", nil)
-	downloadSpec(res, req)
+	NewFileManager().downloadSpec(res, req)
 
 	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
@@ -41,14 +41,14 @@ func TestDownloadMd5(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/?file=a.txt", nil)
-	downloadMd5(res, req)
+	NewFileManager().downloadMd5(res, req)
 	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
 	md51 := string(body)
 
 	res = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/download/?file=a.txt", nil)
-	downloadMd5(res, req)
+	NewFileManager().downloadMd5(res, req)
 	body, err = io.ReadAll(res.Body)
 	require.Nil(t, err)
 	md52 := string(body)
@@ -62,7 +62,7 @@ func TestDownloadTruncate(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/truncate?file=a.txt&trunc=0", nil)
-	downloadTruncate(res, req)
+	NewFileManager().downloadTruncate(res, req)
 
 	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)
@@ -85,7 +85,7 @@ func TestDownloadDelete(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/download/delete?file=temp.txt", nil)
-	downloadDelete(res, req)
+	NewFileManager().downloadDelete(res, req)
 
 	body, err := io.ReadAll(res.Body)
 	require.Nil(t, err)

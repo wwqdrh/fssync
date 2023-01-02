@@ -34,4 +34,8 @@ test:
 
 .PYONY: dev
 dev:
-	go run . server -s ./examples/sample/stores -d ./examples/sample/data
+	go run . server -s ./tests/testdata/sample/stores -d ./tests/testdata/sample/data
+
+.PHONY: dev_client
+dev_client:
+	go run . client download --down ./tests/testdata/down --watch --all

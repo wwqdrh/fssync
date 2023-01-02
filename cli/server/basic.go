@@ -169,7 +169,7 @@ func (c *basicView) StartServer() {
 
 	ctx, cancel := context.WithCancel(context.TODO())
 	go func() {
-		if err := server.Start(ctx); err != nil {
+		if err := server.NewFileManager().Start(ctx); err != nil {
 			logger.DefaultLogger.Error(err.Error())
 		}
 	}()

@@ -16,7 +16,7 @@ func Command() *clitool.Command {
 			RunE: func(cmd *cobra.Command, args []string) error {
 				ctx, cancel := context.WithCancel(context.TODO())
 				defer cancel()
-				return server.Start(ctx)
+				return server.NewFileManager().Start(ctx)
 			},
 		},
 		Options: []clitool.OptionConfig{

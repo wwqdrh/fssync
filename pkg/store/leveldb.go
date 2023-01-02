@@ -49,7 +49,13 @@ func (s *LeveldbStore) Set(fingerprint, url string) error {
 }
 
 func (s *LeveldbStore) Delete(fingerprint string) error {
-	return s.db.Delete([]byte(fingerprint), nil)
+	items := []string{fingerprint, fingerprint + "maxoffset", fingerprint + "chunkstatus", fingerprint + "combiled"}
+	for _, item := range items {
+		if err := s.db.Delete([]byte(item), nil); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *LeveldbStore) Close() error {

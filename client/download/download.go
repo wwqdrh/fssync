@@ -31,10 +31,10 @@ type Download struct {
 
 // 先判断当前环境是否已经有这个下载任务了
 func NewDownload(fileUrl, fileName, basePath, tempPath string) (*Download, error) {
-	if err := os.MkdirAll(basePath, 0o755); err != nil {
+	if err := os.MkdirAll(basePath, 0o777); err != nil {
 		return nil, fmt.Errorf("创建download basepath失败: %w", err)
 	}
-	if err := os.MkdirAll(path.Join(tempPath, fileName), 0o755); err != nil {
+	if err := os.MkdirAll(path.Join(tempPath, fileName), 0o777); err != nil {
 		return nil, fmt.Errorf("创建download temppath失败: %w", err)
 	}
 
@@ -61,7 +61,7 @@ func NewDownload(fileUrl, fileName, basePath, tempPath string) (*Download, error
 }
 
 func newWriterStream(source string) (io.WriteSeeker, error) {
-	f, err := os.OpenFile(source, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+	f, err := os.OpenFile(source, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if err != nil {
 		return nil, fmt.Errorf("创建文件失败: %w", err)
 	}
@@ -100,8 +100,25 @@ func (u *Download) EncodedMetadata() string {
 	return strings.Join(encoded, ",")
 }
 
+// 清理下载的trunc
+func (u *Download) CleanChuck() error {
+	if err := os.RemoveAll(path.Join(u.tempPath, u.fileName)); err != nil {
+		return err
+	}
+	if err := os.Mkdir(path.Join(u.tempPath, u.fileName), 0o777); err != nil {
+		return err
+	}
+
+	s, err := newWriterStream(u.localPath)
+	if err != nil {
+		return err
+	}
+	u.stream = s
+	return nil
+}
+
 func (u *Download) ChunckStream(chunck int64) (io.WriteSeeker, error) {
-	f, err := os.OpenFile(path.Join(u.tempPath, u.fileName, fmt.Sprintf("%d.chunck", chunck)), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+	f, err := os.OpenFile(path.Join(u.tempPath, u.fileName, fmt.Sprintf("%d.chunck", chunck)), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o777)
 	if err != nil {
 		return nil, fmt.Errorf("创建文件失败: %w", err)
 	}
@@ -115,7 +132,7 @@ func (u *Download) MergeStream(maxChunck int64) error {
 		return err
 	}
 	for i := 0; i < int(maxChunck); i++ {
-		f, err := os.OpenFile(path.Join(u.tempPath, u.fileName, fmt.Sprintf("%d.chunck", i)), os.O_RDONLY, 0o755)
+		f, err := os.OpenFile(path.Join(u.tempPath, u.fileName, fmt.Sprintf("%d.chunck", i)), os.O_RDONLY, 0o777)
 		if err != nil {
 			return fmt.Errorf("打开文件失败: %w", err)
 		}
@@ -128,6 +145,7 @@ func (u *Download) MergeStream(maxChunck int64) error {
 		if err != nil {
 			return fmt.Errorf("写入文件失败: %w", err)
 		}
+		f.Close()
 	}
 	return u.DelTempDir()
 }

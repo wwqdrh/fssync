@@ -9,16 +9,29 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
 	"github.com/wwqdrh/fssync/pkg/protocol"
 	"github.com/wwqdrh/gokit/logger"
+	"github.com/wwqdrh/gokit/ostool"
 	"github.com/wwqdrh/gokit/ostool/fileindex"
 )
 
-func Start(ctx context.Context) error {
+type FileManager struct {
+	updateFile *sync.Map
+}
+
+func NewFileManager() *FileManager {
+	return &FileManager{
+		updateFile: &sync.Map{},
+	}
+}
+
+func (f *FileManager) Start(ctx context.Context) error {
 	if err := os.MkdirAll(ServerFlag.Store, 0o777); err != nil {
 		return fmt.Errorf("创建保存路径失败: %w", err)
 	}
@@ -51,7 +64,13 @@ func Start(ctx context.Context) error {
 	}()
 
 	http.Handle(ServerFlag.Urlpath, http.StripPrefix(ServerFlag.Urlpath, handler))
-	registerAPI()
+	f.registerAPI()
+
+	ctx, cancel := context.WithCancel(context.TODO())
+	defer cancel()
+	if err := f.watchFileModify(ctx); err != nil {
+		logger.DefaultLogger.Warn(err.Error())
+	}
 
 	go func() {
 		logger.DefaultLogger.Info(fmt.Sprintf("start server on: %d", ServerFlag.Port))
@@ -71,18 +90,40 @@ func Start(ctx context.Context) error {
 	}
 }
 
-////////////////////
-// extra api
-////////////////////
-func registerAPI() {
-	http.HandleFunc(protocol.PDownloadList.ServerUrl(), downloadList)
-	http.HandleFunc(protocol.PDownloadSpec.ServerUrl(), downloadSpec)
-	http.HandleFunc(protocol.PDownloadMd5.ServerUrl(), downloadMd5)
-	http.HandleFunc(protocol.PDownloadTrucate.ServerUrl(), downloadTruncate)
-	http.HandleFunc(protocol.PDownloadDelete.ServerUrl(), downloadDelete)
+func (f *FileManager) watchFileModify(ctx context.Context) error {
+	return ostool.RegisterNotify(ctx, ServerFlag.ExtraPath, func(e fsnotify.Event) {
+		f.updateFile.Store(strings.TrimPrefix(e.Name, ServerFlag.ExtraPath), struct{}{})
+	})
 }
 
-func downloadList(w http.ResponseWriter, r *http.Request) {
+func (f *FileManager) registerAPI() {
+	http.HandleFunc(protocol.PDownloadUpdate.ServerUrl(), f.downloadUpdateList)
+	http.HandleFunc(protocol.PDownloadList.ServerUrl(), f.downloadList)
+	http.HandleFunc(protocol.PDownloadSpec.ServerUrl(), f.downloadSpec)
+	http.HandleFunc(protocol.PDownloadMd5.ServerUrl(), f.downloadMd5)
+	http.HandleFunc(protocol.PDownloadTrucate.ServerUrl(), f.downloadTruncate)
+	http.HandleFunc(protocol.PDownloadDelete.ServerUrl(), f.downloadDelete)
+}
+
+func (f *FileManager) downloadUpdateList(w http.ResponseWriter, r *http.Request) {
+	if ServerFlag.ExtraPath == "" {
+		if _, err := w.Write([]byte("未设置extrapath目录")); err != nil {
+			logger.DefaultLogger.Error(err.Error())
+		}
+		return
+	}
+
+	files := []string{}
+	f.updateFile.Range(func(key, value any) bool {
+		files = append(files, strings.TrimPrefix(key.(string), ServerFlag.ExtraPath))
+		return true
+	})
+	if _, err := w.Write([]byte(strings.Join(files, ","))); err != nil {
+		logger.DefaultLogger.Error(err.Error())
+	}
+}
+
+func (f *FileManager) downloadList(w http.ResponseWriter, r *http.Request) {
 	if ServerFlag.ExtraPath == "" {
 		if _, err := w.Write([]byte("未设置extrapath目录")); err != nil {
 			logger.DefaultLogger.Error(err.Error())
@@ -103,7 +144,8 @@ func downloadList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func downloadSpec(w http.ResponseWriter, r *http.Request) {
+// 获取spec信息，在更新中当获取信息时肯定就对应了下载，所以可以在这里将udpateFIle对应的文件删除
+func (f *FileManager) downloadSpec(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("file")
 	if filename == "" {
 		if _, err := w.Write([]byte("未设置query参数file")); err != nil {
@@ -126,13 +168,14 @@ func downloadSpec(w http.ResponseWriter, r *http.Request) {
 			logger.DefaultLogger.Error(err.Error())
 		}
 	} else {
+		f.updateFile.Delete(filename)
 		if _, err := w.Write([]byte(fmt.Sprint(res))); err != nil {
 			logger.DefaultLogger.Error(err.Error())
 		}
 	}
 }
 
-func downloadMd5(w http.ResponseWriter, r *http.Request) {
+func (f *FileManager) downloadMd5(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("file")
 	md5, err := fileindex.FileMd5BySpec(path.Join(ServerFlag.ExtraPath, filename))
 	if err != nil {
@@ -148,7 +191,7 @@ func downloadMd5(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func downloadTruncate(w http.ResponseWriter, r *http.Request) {
+func (f *FileManager) downloadTruncate(w http.ResponseWriter, r *http.Request) {
 	filename, trunc := r.URL.Query().Get("file"), r.URL.Query().Get("trunc")
 	if filename == "" || trunc == "" {
 		if _, err := w.Write([]byte("未设置query参数file或者trunc")); err != nil {
@@ -181,7 +224,7 @@ func downloadTruncate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func downloadDelete(w http.ResponseWriter, r *http.Request) {
+func (f *FileManager) downloadDelete(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("file")
 	if err := os.Remove(path.Join(ServerFlag.ExtraPath, filename)); err != nil {
 		w.WriteHeader(400)

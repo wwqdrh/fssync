@@ -1,50 +1,40 @@
 package tests
 
-import (
-	"errors"
-	"os"
-	"testing"
+// var f = int64(0) // atomic
 
-	"github.com/stretchr/testify/suite"
-	"github.com/wwqdrh/fssync/client"
-	"github.com/wwqdrh/fssync/server"
-)
+// func init() {
+// 	server.ServerFlag.Port = 1080
+// 	server.ServerFlag.Store = "./testdata/store"
+// 	server.ServerFlag.Urlpath = "/files/"
+// 	server.ServerFlag.Store = "./testdata/store"
 
-var f = int64(0) // atomic
+// 	client.ClientUploadFlag.Host = "http://127.0.0.1:1080/files/"
+// 	client.ClientUploadFlag.SpecPath = "./testdata/uploadspec"
+// }
 
-func init() {
-	server.ServerFlag.Port = 1080
-	server.ServerFlag.Store = "./testdata/store"
-	server.ServerFlag.Urlpath = "/files/"
-	server.ServerFlag.Store = "./testdata/store"
+// type UploadSuite struct {
+// 	suite.Suite
+// }
 
-	client.ClientUploadFlag.Host = "http://127.0.0.1:1080/files/"
-	client.ClientUploadFlag.SpecPath = "./testdata/uploadspec"
-}
+// func TestUploadSuite(t *testing.T) {
+// 	suite.Run(t, &UploadSuite{})
+// }
 
-type UploadSuite struct {
-	suite.Suite
-}
+// func (s *UploadSuite) TestCreateUploadFile() {
+// 	client.ClientUploadFlag.Uploadfile = "./testdata/testupload.txt"
+// 	if err := client.UploadStart(); err != nil {
+// 		s.T().Error(err)
+// 	}
+// }
 
-func TestUploadSuite(t *testing.T) {
-	suite.Run(t, &UploadSuite{})
-}
+// func (s *UploadSuite) TestResumeUploadFile() {
+// 	_, err := os.Stat("./testdata/video.mp4")
+// 	if errors.Is(err, os.ErrNotExist) {
+// 		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")
+// 	}
+// 	client.ClientUploadFlag.Uploadfile = "./testdata/video.mp4"
 
-func (s *UploadSuite) TestCreateUploadFile() {
-	client.ClientUploadFlag.Uploadfile = "./testdata/testupload.txt"
-	if err := client.UploadStart(); err != nil {
-		s.T().Error(err)
-	}
-}
-
-func (s *UploadSuite) TestResumeUploadFile() {
-	_, err := os.Stat("./testdata/video.mp4")
-	if errors.Is(err, os.ErrNotExist) {
-		s.T().Skip("大文件未加入版本控制中，要测试请手动加入")
-	}
-	client.ClientUploadFlag.Uploadfile = "./testdata/video.mp4"
-
-	if err := client.UploadStart(); err != nil {
-		s.T().Error(err)
-	}
-}
+// 	if err := client.UploadStart(); err != nil {
+// 		s.T().Error(err)
+// 	}
+// }

@@ -65,6 +65,19 @@ func Command() *clitool.Command {
 				DefaultValue: false,
 				Description:  "是否删除",
 			},
+			{
+				Target:       "Watch",
+				Name:         "watch",
+				DefaultValue: false,
+				Description:  "是监听更新",
+			},
+			{
+				Target:       "Interval",
+				Name:         "interval",
+				Alias:        "i",
+				DefaultValue: 10,
+				Description:  "更新数据的频率",
+			},
 		},
 		Values: &client.ClientDownloadFlag,
 	})

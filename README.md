@@ -63,10 +63,10 @@ fssync -mode server
 fssync -mode client
 ```
 
-拉取服务端的文件夹
+拉取服务端的文件夹, 默认同步时间间隔为10秒
 
 ```bash
 fssync server -d [需要开放的文件夹]
 
-fssync client download -h [服务端地址] --all
+fssync client download -h [服务端地址] --watch --all
 ```

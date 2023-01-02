@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
+	"time"
 
 	"github.com/wwqdrh/fssync/client/download"
 	"github.com/wwqdrh/fssync/client/upload"
@@ -14,10 +16,10 @@ import (
 )
 
 func newClient() (*download.DownloadClient, error) {
-	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
+	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o777); err != nil {
 		return nil, fmt.Errorf("创建spec失败: %w", err)
 	}
-	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
+	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o777); err != nil {
 		return nil, fmt.Errorf("创建temp失败: %w", err)
 	}
 
@@ -99,17 +101,45 @@ func DownloadStart() error {
 		if err != nil {
 			return fmt.Errorf("获取下载列表失败: %w", err)
 		}
-		for _, item := range fileList {
-			if err := downloadOne(client, item); err != nil {
-				logger.DefaultLogger.Warn(err.Error())
-			} else {
-				logger.DefaultLogger.Debug(item + "下载成功")
+		if err := DownloadAll(client, fileList, false); err != nil {
+			return err
+		}
+
+		if ClientDownloadFlag.Watch {
+			timer := time.NewTicker(time.Duration(ClientDownloadFlag.Interval) * time.Second)
+			defer timer.Stop()
+			for range timer.C {
+				fileList, err = client.FileUpdateList()
+				if err != nil {
+					logger.DefaultLogger.Warn(err.Error())
+					continue
+				}
+				logger.DefaultLogger.Infox("update file: %s", nil, strings.Join(fileList, ","))
+				if len(fileList) == 0 {
+					continue
+				}
+
+				if err := DownloadAll(client, fileList, true); err != nil {
+					logger.DefaultLogger.Warn(err.Error())
+				}
 			}
 		}
+
 		return nil
 	} else {
-		return downloadOne(client, ClientDownloadFlag.FileName)
+		return downloadOne(client, ClientDownloadFlag.FileName, false)
 	}
+}
+
+func DownloadAll(client *download.DownloadClient, fileList []string, force bool) error {
+	for _, item := range fileList {
+		if err := downloadOne(client, strings.TrimSpace(item), force); err != nil {
+			logger.DefaultLogger.Warn(err.Error())
+		} else {
+			logger.DefaultLogger.Debug(item + "下载成功")
+		}
+	}
+	return nil
 }
 
 func DownloadStartByList(files ...string) []error {
@@ -121,14 +151,18 @@ func DownloadStartByList(files ...string) []error {
 
 	errs := []error{}
 	for _, item := range files {
-		if err := downloadOne(client, item); err != nil {
+		if err := downloadOne(client, item, false); err != nil {
 			errs = append(errs, err)
 		}
 	}
 	return errs
 }
 
-func downloadOne(client *download.DownloadClient, fileName string) error {
+func downloadOne(client *download.DownloadClient, fileName string, force bool) error {
+	if fileName == "" {
+		return errors.New("文件名不能为空")
+	}
+
 	if err := os.MkdirAll(path.Dir(path.Join(ClientDownloadFlag.DownloadPath, fileName)), os.ModePerm); err != nil {
 		return err
 	}
@@ -138,7 +172,7 @@ func downloadOne(client *download.DownloadClient, fileName string) error {
 		return fmt.Errorf("newdownload err %w", err)
 	}
 
-	downloader, err := client.CreateOrResumeDownload(download)
+	downloader, err := client.CreateOrResumeDownload(download, force)
 	if err != nil {
 		return fmt.Errorf("downlaoded err: %w", err)
 	}
@@ -150,10 +184,10 @@ func downloadOne(client *download.DownloadClient, fileName string) error {
 }
 
 func DownloadList() ([]string, error) {
-	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o755); err != nil {
+	if err := os.MkdirAll(ClientDownloadFlag.SpecPath, 0o777); err != nil {
 		return nil, fmt.Errorf("创建spec失败: %w", err)
 	}
-	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o755); err != nil {
+	if err := os.MkdirAll(ClientDownloadFlag.TempPath, 0o777); err != nil {
 		return nil, fmt.Errorf("创建temp失败: %w", err)
 	}
 
