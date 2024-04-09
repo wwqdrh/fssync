@@ -1,27 +1,14 @@
 package main
 
 import (
-	"github.com/wwqdrh/fssync/cli"
+	"github.com/wwqdrh/fssync/client"
+	"github.com/wwqdrh/fssync/server"
+	"github.com/wwqdrh/gokit/clitool"
 )
 
-// var mode = flag.String("mode", "", "client or server")
-
 func main() {
-	cli.StartCli()
-
-	// flag.Parse()
-	// if *mode == "" {
-	// 	flag.Usage()
-	// 	return
-	// }
-
-	// switch *mode {
-	// case "client":
-	// 	if err := tea.NewProgram(client.NewClientView()).Start(); err != nil {
-	// 		fmt.Printf("could not start program: %s\n", err)
-	// 		os.Exit(1)
-	// 	}
-	// case "server":
-	// 	server.StartCli()
-	// }
+	cmd := clitool.Command{}
+	cmd.Add(client.Command())
+	cmd.Add(server.Command())
+	cmd.Run()
 }
