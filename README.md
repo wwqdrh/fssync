@@ -59,18 +59,8 @@ fssync --help
 
 ### 使用
 
-操作界面为tui，根据提示填写必要参数即可
+`webdav同步`
 
 ```bash
-fssync -mode server
-
-fssync -mode client
-```
-
-拉取服务端的文件夹, 默认同步时间间隔为10秒
-
-```bash
-fssync server -d [需要开放的文件夹]
-
-fssync client download -h [服务端地址] --watch --all
+fssync client webdav
 ```

@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type JianguoDriver struct {
@@ -198,6 +200,8 @@ func (d *JianguoDriver) Update(local, remote string) error {
 		return ErrInvUrl
 	}
 
+	d.createDirectories(local)
+
 	file, err := os.Open(local)
 	if err != nil {
 		return err
@@ -218,5 +222,41 @@ func (d *JianguoDriver) Update(local, remote string) error {
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("failed to upload file: %s", resp.Status)
 	}
+	return nil
+}
+
+func (d *JianguoDriver) createDirectories(local string) error {
+	if !d.IsAuth() {
+		return ErrNotAuth
+	}
+	dirPath := filepath.Dir(local)
+	if dirPath == "." || dirPath == "/" || dirPath == "" {
+		return nil
+	}
+
+	pathParts := strings.Split(dirPath, "/")
+	currentPath := ""
+	for _, part := range pathParts {
+		if part == "" {
+			continue
+		}
+
+		currentPath = filepath.Join(currentPath, part)
+
+		req, err := http.NewRequest("MKCOL", d.entry+currentPath, nil)
+		if err != nil {
+			return err
+		}
+		req.SetBasicAuth(d.authName, d.authPassword)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+			return fmt.Errorf("failed to upload file: %s", resp.Status)
+		}
+	}
+
 	return nil
 }

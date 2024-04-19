@@ -17,10 +17,20 @@ var (
 		Interval:     10,
 	}
 	ClientUploadFlag ClientUploadCmdFlag
+	ClientWebDavFlag = struct {
+		CfgFile  string   `name:"cfg" echo:"true" desc:"存储配置文件地址"`
+		Name     string   `name:"name" echo:"true" desc:"webdav服务名, example(坚果云)"`
+		Ignores  []string `name:"ignores" echo:"true" desc:"忽略部分文件不上传"`
+		Work     string   `name:"work" echo:"true" desc:"工作目录"`
+		Interval int      `name:"interval" echo:"true" desc:"更新检查频率(ms)"`
+	}{
+		CfgFile:  "config.json",
+		Name:     "坚果云",
+		Work:     ".",
+		Interval: 10000,
+		Ignores:  []string{"config.json"},
+	}
 )
-
-type ClientWebDavFlag struct {
-}
 
 type ClientDownloadCmdFlag struct {
 	DownloadUrl  string `name:"host" desc:"服务端地址"`
@@ -69,6 +79,7 @@ func Command() *clitool.Command {
 				return SyncWebdav()
 			},
 		},
+		Values: &ClientWebDavFlag,
 	})
 	cmd.Add(&clitool.Command{
 		Cmd: &cobra.Command{

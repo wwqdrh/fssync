@@ -3,15 +3,15 @@ module github.com/wwqdrh/fssync
 go 1.18
 
 require (
-	github.com/fsnotify/fsnotify v1.6.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tus/tusd v1.9.0
-	github.com/wwqdrh/gokit/clitool v0.0.0-20240209150041-5be6090cf352
-	github.com/wwqdrh/gokit/logger v0.0.0-20240209150041-5be6090cf352
-	github.com/wwqdrh/gokit/ostool v0.0.0-20230102163428-53ee24d8b439
+	github.com/wwqdrh/gokit/clitool v0.0.0-20240419151209-f35e637b4fdd
+	github.com/wwqdrh/gokit/logger v0.0.0-20240419151209-f35e637b4fdd
+	github.com/wwqdrh/gokit/ostool v0.0.0-20240419145209-5e3bb65bedc6
 )
 
 require (
@@ -23,6 +23,7 @@ require (
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
