@@ -8,12 +8,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/wwqdrh/gokit/logger"
 )
 
 type JianguoDriver struct {
 	entry        string
 	authName     string
 	authPassword string
+	ignores      map[string]struct{}
 }
 
 // 定义结构体与XML节点对应
@@ -56,7 +59,14 @@ type Multistatus struct {
 
 func NewJianguoDriver() IDriver {
 	return &JianguoDriver{
-		entry: "https://dav.jianguoyun.com/dav/我的坚果云/",
+		entry:   "https://dav.jianguoyun.com/dav/我的坚果云/",
+		ignores: map[string]struct{}{},
+	}
+}
+
+func (d *JianguoDriver) SetIgnore(p []string) {
+	for _, item := range p {
+		d.ignores[item] = struct{}{}
 	}
 }
 
@@ -198,6 +208,10 @@ func (d *JianguoDriver) Update(local, remote string) error {
 	}
 	if remote == "" {
 		return ErrInvUrl
+	}
+	if _, exist := d.ignores[local]; exist {
+		logger.DefaultLogger.Debug("skip this file")
+		return nil
 	}
 
 	d.createDirectories(local)

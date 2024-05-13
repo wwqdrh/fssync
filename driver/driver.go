@@ -24,6 +24,7 @@ type FileItem struct {
 }
 
 type IDriver interface {
+	SetIgnore(p []string)
 	Auth(name, password string)
 	IsAuth() bool
 	Download(url string) error
@@ -33,8 +34,9 @@ type IDriver interface {
 }
 
 type DriverConfig struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+	Ignores  []string `json:"ignores"`
 }
 
 var defaultDriverData = map[string]DriverConfig{
@@ -92,6 +94,7 @@ func LoadDriver(dataPath string, name string) (IDriver, error) {
 	case "坚果云":
 		d := NewJianguoDriver()
 		d.Auth(driverConfig.Username, driverConfig.Password)
+		d.SetIgnore(driverConfig.Ignores)
 		return d, nil
 	default:
 		return nil, errors.New("no this driver")

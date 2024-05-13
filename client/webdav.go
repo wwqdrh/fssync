@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/wwqdrh/fssync/driver"
@@ -15,6 +16,11 @@ import (
 func registerFileUpdate(d driver.IDriver, ctx context.Context) {
 	tree := fileindex.NewFileInfoTree(ClientWebDavFlag.Work, ClientWebDavFlag.Interval, ClientWebDavFlag.Ignores)
 	tree.SetOnFileInfoUpdate(func(fi fileindex.FileIndex) {
+		if strings.HasPrefix(fi.BaseName, ".") || strings.HasPrefix(fi.BaseName, "_") {
+			// 隐藏文件不进行上传
+			return
+		}
+
 		realPath, err := filepath.Rel(ClientWebDavFlag.Work, fi.Path)
 		if err != nil {
 			logger.DefaultLogger.Error(err.Error())
