@@ -15,6 +15,7 @@ import (
 
 func registerFileUpdate(d driver.IDriver, ctx context.Context) {
 	tree := fileindex.NewFileInfoTree(ClientWebDavFlag.Work, ClientWebDavFlag.Interval, ClientWebDavFlag.Ignores)
+	tree.SetDefaultTimeLines(d.GetLastTimelineMap())
 	tree.SetOnFileInfoUpdate(func(fi fileindex.FileIndex) {
 		if strings.HasPrefix(fi.BaseName, ".") || strings.HasPrefix(fi.BaseName, "_") {
 			// 隐藏文件不进行上传

@@ -10,7 +10,7 @@ import (
 func testGetJianguoDriver(t *testing.T) (IDriver, bool) {
 	godotenv.Load("testdata/env")
 
-	d := NewJianguoDriver()
+	d := NewJianguoDriver(nil)
 	d.Auth(os.Getenv("jianguousername"), os.Getenv("jianguopassword"))
 	if !d.IsAuth() {
 		t.Skip("no webdav env, skip")

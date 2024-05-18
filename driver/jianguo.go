@@ -13,6 +13,7 @@ import (
 )
 
 type JianguoDriver struct {
+	iconf        IDriverConfig
 	entry        string
 	authName     string
 	authPassword string
@@ -57,8 +58,9 @@ type Multistatus struct {
 	Responses []Response `xml:"response"`
 }
 
-func NewJianguoDriver() IDriver {
+func NewJianguoDriver(iconf IDriverConfig) IDriver {
 	return &JianguoDriver{
+		iconf:   iconf,
 		entry:   "https://dav.jianguoyun.com/dav/我的坚果云/",
 		ignores: map[string]struct{}{},
 	}
@@ -202,6 +204,17 @@ func (d *JianguoDriver) Delete(remote string) error {
 	return nil
 }
 
+func (d *JianguoDriver) GetLastTimeline(name string) string {
+	if d.iconf != nil {
+		return d.iconf.GetLastTimeline("坚果云", name)
+	}
+	return ""
+}
+
+func (d *JianguoDriver) GetLastTimelineMap() map[string]int64 {
+	return d.iconf.GetLastTimelineMap("坚果云")
+}
+
 func (d *JianguoDriver) Update(local, remote string) error {
 	if !d.IsAuth() {
 		return ErrNotAuth
@@ -213,7 +226,6 @@ func (d *JianguoDriver) Update(local, remote string) error {
 		logger.DefaultLogger.Debug("skip this file")
 		return nil
 	}
-
 	d.createDirectories(local)
 
 	file, err := os.Open(local)
@@ -235,6 +247,9 @@ func (d *JianguoDriver) Update(local, remote string) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("failed to upload file: %s", resp.Status)
+	}
+	if d.iconf != nil {
+		d.iconf.SetLastTimeline("坚果云", local)
 	}
 	return nil
 }
