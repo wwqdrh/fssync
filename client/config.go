@@ -1,12 +1,15 @@
 package client
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/wwqdrh/gokit/clitool"
 	"github.com/wwqdrh/gokit/logger"
 )
+
+var RootSpecPath = ""
 
 var (
 	ClientDownloadFlag = ClientDownloadCmdFlag{
@@ -30,6 +33,13 @@ var (
 		Interval: 10000,
 		Ignores:  []string{"config.json"},
 	}
+
+	ClientPicBedFlag = struct {
+		Prefix string `name:"prefix"`
+		PicId  string `name:"id" required:"true"`
+		File   string `name:"file" required:"true"`
+		Cookie string `name:"cookie" required:"true"`
+	}{}
 )
 
 type ClientDownloadCmdFlag struct {
@@ -80,6 +90,23 @@ func Command() *clitool.Command {
 			},
 		},
 		Values: &ClientWebDavFlag,
+	})
+	cmd.Add(&clitool.Command{
+		Cmd: &cobra.Command{
+			Use: "pic",
+			RunE: func(cmd *cobra.Command, args []string) error {
+				picid := ClientPicBedFlag.PicId
+				picurl, localPath, err := fnUpload(ClientPicBedFlag.Prefix, ClientPicBedFlag.File, ClientPicBedFlag.Cookie)
+				if err != nil {
+					return err
+				}
+				fmt.Println(picurl)
+				addRecord(picid, localPath, picurl)
+
+				return nil
+			},
+		},
+		Values: &ClientPicBedFlag,
 	})
 	cmd.Add(&clitool.Command{
 		Cmd: &cobra.Command{
