@@ -1,6 +1,6 @@
 module github.com/wwqdrh/fssync
 
-go 1.18
+go 1.22.3
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0
@@ -9,6 +9,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tus/tusd v1.9.0
+	github.com/wwqdrh/clipboard v0.0.0-20240607114924-4948fdf8534f
 	github.com/wwqdrh/gokit/clitool v0.0.0-20240419151209-f35e637b4fdd
 	github.com/wwqdrh/gokit/logger v0.0.0-20240518034343-a1a0497378d2
 	github.com/wwqdrh/gokit/ostool v0.0.0-20240518034343-a1a0497378d2
@@ -28,6 +29,10 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
+	golang.design/x/clipboard v0.7.0 // indirect
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
+	golang.org/x/image v0.6.0 // indirect
+	golang.org/x/mobile v0.0.0-20230301163155-e0f57694e12c // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect

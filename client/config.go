@@ -1,10 +1,10 @@
 package client
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/wwqdrh/clipboard"
 	"github.com/wwqdrh/gokit/clitool"
 	"github.com/wwqdrh/gokit/logger"
 )
@@ -37,8 +37,8 @@ var (
 	ClientPicBedFlag = struct {
 		Prefix string `name:"prefix"`
 		PicId  string `name:"id" required:"true"`
-		File   string `name:"file" required:"true"`
-		Cookie string `name:"cookie" required:"true"`
+		File   string `name:"file"`
+		Cookie string `name:"cookie"`
 	}{}
 )
 
@@ -100,10 +100,8 @@ func Command() *clitool.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Println(picurl)
 				addRecord(picid, localPath, picurl)
-
-				return nil
+				return clipboard.WriteAll(picurl)
 			},
 		},
 		Values: &ClientPicBedFlag,

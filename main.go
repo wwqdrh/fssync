@@ -18,7 +18,7 @@ func initSpecPath() string {
 	}
 
 	specPath := path.Join(home, ".fssync")
-	if _, err := os.ReadDir(specPath); os.IsNotExist(err) {
+	if _, err := os.Stat(specPath); os.IsNotExist(err) {
 		if err := os.MkdirAll(specPath, os.ModePerm); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
