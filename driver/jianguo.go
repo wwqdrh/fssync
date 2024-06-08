@@ -204,11 +204,11 @@ func (d *JianguoDriver) Delete(remote string) error {
 	return nil
 }
 
-func (d *JianguoDriver) GetLastTimeline(name string) string {
+func (d *JianguoDriver) GetLastTimeline(name string) int64 {
 	if d.iconf != nil {
 		return d.iconf.GetLastTimeline("坚果云", name)
 	}
-	return ""
+	return 0
 }
 
 func (d *JianguoDriver) GetLastTimelineMap() map[string]int64 {

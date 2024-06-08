@@ -21,11 +21,11 @@ var (
 	}
 	ClientUploadFlag ClientUploadCmdFlag
 	ClientWebDavFlag = struct {
-		CfgFile  string   `name:"cfg" echo:"true" desc:"存储配置文件地址"`
-		Name     string   `name:"name" echo:"true" desc:"webdav服务名, example(坚果云)"`
-		Ignores  []string `name:"ignores" echo:"true" desc:"忽略部分文件不上传"`
-		Work     string   `name:"work" echo:"true" desc:"工作目录"`
-		Interval int      `name:"interval" echo:"true" desc:"更新检查频率(ms)"`
+		CfgFile  string   `name:"cfg" desc:"存储配置文件地址"`
+		Name     string   `name:"name" desc:"webdav服务名, example(坚果云)"`
+		Ignores  []string `name:"ignores" desc:"忽略部分文件不上传"`
+		Work     string   `name:"work" desc:"工作目录"`
+		Interval int      `name:"interval" desc:"更新检查频率(ms)"`
 	}{
 		CfgFile:  "config.json",
 		Name:     "坚果云",

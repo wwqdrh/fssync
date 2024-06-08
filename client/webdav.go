@@ -28,7 +28,7 @@ func registerFileUpdate(d driver.IDriver, ctx context.Context) {
 			return
 		}
 		logger.DefaultLogger.Infox("update file %s to %s", nil, fi.Path, realPath)
-		d.Update(fi.Path, realPath)
+		go d.Update(fi.Path, realPath)
 	})
 	// 启动更新
 	tree.Start()

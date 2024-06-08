@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/wwqdrh/gokit/logger"
@@ -34,25 +35,25 @@ type IDriver interface {
 	List(url string) ([]FileItem, error)
 	Delete(url string) error
 	Update(local, url string) error
-	GetLastTimeline(name string) string
+	GetLastTimeline(name string) int64
 	GetLastTimelineMap() map[string]int64
 }
 
 type DriverConfigAll struct {
 	cfg  string
-	data map[string]*DriverConfig
+	data *sync.Map // map[string]*DriverConfig
 }
 
 type DriverConfig struct {
-	Username  string            `json:"username"`
-	Password  string            `json:"password"`
-	Ignores   []string          `json:"ignores"`
-	TimeLines map[string]string `json:"timelines"` // 存储各个文件的上次上传时间
+	Username  string           `json:"username"`
+	Password  string           `json:"password"`
+	Ignores   []string         `json:"ignores"`
+	TimeLines map[string]int64 `json:"timelines"` // 存储各个文件的上次上传时间
 }
 
 type IDriverConfig interface {
-	GetLastTimeline(mode string, pname string) string // 获取文件的上次上传时间
-	SetLastTimeline(mode string, pname string)        // 设置文件上次上传时间
+	GetLastTimeline(mode string, pname string) int64 // 获取文件的上次上传时间
+	SetLastTimeline(mode string, pname string)       // 设置文件上次上传时间
 	GetLastTimelineMap(mode string) map[string]int64
 	GetConfig(mode string) (*DriverConfig, bool)
 }
@@ -75,61 +76,67 @@ func NewDriverConfigAll(cfg string) (IDriverConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	m := &sync.Map{}
+	for key, v := range config {
+		m.Store(key, v)
+	}
 	return &DriverConfigAll{
 		cfg:  cfg,
-		data: config,
+		data: m,
 	}, nil
 }
 
-func (c *DriverConfigAll) GetLastTimeline(mode string, pname string) string {
-	cfg, ok := c.data[mode]
+func (c *DriverConfigAll) GetLastTimeline(mode string, pname string) int64 {
+	cfg, ok := c.data.Load(mode)
 	if !ok {
-		return ""
+		return 0
 	}
-	lastupdate, ok := cfg.TimeLines[pname]
+	lastupdate, ok := cfg.(*DriverConfig).TimeLines[pname]
 	if !ok {
-		return ""
+		return 0
 	}
 	return lastupdate
 }
 
 func (c *DriverConfigAll) GetLastTimelineMap(mode string) map[string]int64 {
-	cfg, ok := c.data[mode]
+	cfg, ok := c.data.Load(mode)
 	if !ok {
 		return map[string]int64{}
 	}
 
 	res := map[string]int64{}
-	for name, t := range cfg.TimeLines {
-		tt, err := time.Parse(time.RFC3339, t)
-		if err != nil {
-			logger.DefaultLogger.Warn(err.Error())
-			continue
-		}
-		res[name] = tt.UnixNano()
+	for name, t := range cfg.(*DriverConfig).TimeLines {
+		res[name] = t
 	}
 	return res
 }
 
 func (c *DriverConfigAll) SetLastTimeline(mode string, pname string) {
-	cfg, ok := c.data[mode]
+	cfgR, ok := c.data.Load(mode)
 	if !ok {
 		return
 	}
+	cfg := cfgR.(*DriverConfig)
 	if cfg.TimeLines == nil {
-		cfg.TimeLines = map[string]string{}
+		cfg.TimeLines = map[string]int64{}
 	}
-	cfg.TimeLines[pname] = time.Now().Format(time.RFC3339)
+	cfg.TimeLines[pname] = time.Now().UnixNano()
 	c.dump()
 }
 
 func (c *DriverConfigAll) GetConfig(mode string) (*DriverConfig, bool) {
-	config, ok := c.data[mode]
-	return config, ok
+	config, ok := c.data.Load(mode)
+	return config.(*DriverConfig), ok
 }
 
 func (c *DriverConfigAll) dump() {
-	data, err := json.Marshal(c.data)
+	configs := map[string]*DriverConfig{}
+	c.data.Range(func(key, value any) bool {
+		configs[key.(string)] = value.(*DriverConfig)
+		return true
+	})
+
+	data, err := json.Marshal(configs)
 	if err != nil {
 		logger.DefaultLogger.Warn(err.Error())
 		return

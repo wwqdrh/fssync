@@ -11,8 +11,9 @@ require (
 	github.com/tus/tusd v1.9.0
 	github.com/wwqdrh/clipboard v0.0.0-20240607114924-4948fdf8534f
 	github.com/wwqdrh/gokit/clitool v0.0.0-20240419151209-f35e637b4fdd
-	github.com/wwqdrh/gokit/logger v0.0.0-20240518034343-a1a0497378d2
-	github.com/wwqdrh/gokit/ostool v0.0.0-20240518034343-a1a0497378d2
+	github.com/wwqdrh/gokit/logger v0.0.0-20240608053445-7d472fcab50b
+	github.com/wwqdrh/gokit/ostool v0.0.0-20240608053445-7d472fcab50b
+	golang.design/x/clipboard v0.7.0
 )
 
 require (
@@ -29,15 +30,18 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.design/x/clipboard v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6 // indirect
 	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/mobile v0.0.0-20230301163155-e0f57694e12c // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// replace (
+// 	github.com/wwqdrh/gokit/ostool v0.0.0-20240608052022-8b8edfce4cae => ../gokit/ostool
+// )
