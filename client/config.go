@@ -1,7 +1,9 @@
 package client
 
 import (
+	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/wwqdrh/clipboard"
@@ -36,7 +38,7 @@ var (
 
 	ClientPicBedFlag = struct {
 		Prefix string `name:"prefix"`
-		PicId  string `name:"id" required:"true"`
+		PicId  string `name:"id"`
 		File   string `name:"file"`
 		Cookie string `name:"cookie"`
 	}{}
@@ -96,11 +98,17 @@ func Command() *clitool.Command {
 			Use: "pic",
 			RunE: func(cmd *cobra.Command, args []string) error {
 				picid := ClientPicBedFlag.PicId
+				if picid == "" {
+					picid = time.Now().Format("20060102150405")
+				}
 				picurl, localPath, err := fnUpload(ClientPicBedFlag.Prefix, ClientPicBedFlag.File, ClientPicBedFlag.Cookie)
 				if err != nil {
 					return err
 				}
-				addRecord(picid, localPath, picurl)
+				if err := addRecord(picid, localPath, picurl); err != nil {
+					return err
+				}
+				fmt.Printf("picid: %s\n", picid)
 				return clipboard.WriteAll(picurl)
 			},
 		},
