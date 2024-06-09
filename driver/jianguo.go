@@ -18,6 +18,7 @@ type JianguoDriver struct {
 	authName     string
 	authPassword string
 	ignores      map[string]struct{}
+	extras       map[string]string
 }
 
 // 定义结构体与XML节点对应
@@ -63,12 +64,22 @@ func NewJianguoDriver(iconf IDriverConfig) IDriver {
 		iconf:   iconf,
 		entry:   "https://dav.jianguoyun.com/dav/我的坚果云/",
 		ignores: map[string]struct{}{},
+		extras:  map[string]string{},
 	}
 }
 
 func (d *JianguoDriver) SetIgnore(p []string) {
 	for _, item := range p {
 		d.ignores[item] = struct{}{}
+	}
+}
+
+func (d *JianguoDriver) UploadExtras(p map[string]string) {
+	for local, remote := range p {
+		logger.DefaultLogger.Infox("upload a file %s to %s", nil, local, remote)
+		if err := d.Update(local, remote); err != nil {
+			logger.DefaultLogger.Warn(err.Error())
+		}
 	}
 }
 
@@ -226,7 +237,7 @@ func (d *JianguoDriver) Update(local, remote string) error {
 		logger.DefaultLogger.Debug("skip this file")
 		return nil
 	}
-	d.createDirectories(local)
+	d.createDirectories(remote)
 
 	file, err := os.Open(local)
 	if err != nil {

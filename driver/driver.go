@@ -29,6 +29,7 @@ type FileItem struct {
 
 type IDriver interface {
 	SetIgnore(p []string)
+	UploadExtras(p map[string]string) // local, remove
 	Auth(name, password string)
 	IsAuth() bool
 	Download(url string) error
@@ -45,10 +46,11 @@ type DriverConfigAll struct {
 }
 
 type DriverConfig struct {
-	Username  string           `json:"username"`
-	Password  string           `json:"password"`
-	Ignores   []string         `json:"ignores"`
-	TimeLines map[string]int64 `json:"timelines"` // 存储各个文件的上次上传时间
+	Username  string            `json:"username"`
+	Password  string            `json:"password"`
+	Extras    map[string]string `json:"extras"`
+	Ignores   []string          `json:"ignores"`
+	TimeLines map[string]int64  `json:"timelines"` // 存储各个文件的上次上传时间
 }
 
 type IDriverConfig interface {
@@ -191,6 +193,7 @@ func LoadDriver(dataPath string, name string) (IDriver, error) {
 		d := NewJianguoDriver(da)
 		d.Auth(driverConfig.Username, driverConfig.Password)
 		d.SetIgnore(driverConfig.Ignores)
+		d.UploadExtras(driverConfig.Extras)
 		return d, nil
 	default:
 		return nil, errors.New("no this driver")

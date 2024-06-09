@@ -108,7 +108,8 @@ func Command() *clitool.Command {
 				if err := addRecord(picid, localPath, picurl); err != nil {
 					return err
 				}
-				fmt.Printf("picid: %s\n", picid)
+				fmt.Printf("data-id=\"%s\"\n", picid)
+				fmt.Printf("url=\"%s\"\n", picurl)
 				return clipboard.WriteAll(picurl)
 			},
 		},
