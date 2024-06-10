@@ -30,7 +30,7 @@ func fnUpload(prefix, file, cookie string) (string, string, error) {
 	}
 	uploader := NewWeiboUploader()
 	fileURL := file
-	domain := prefix + "https://ww1.sinaimg.cn"
+	domain := prefix + "https://cdn.ipfsscan.io/weibo"
 	quality := "large"
 	cookieMode := true
 
